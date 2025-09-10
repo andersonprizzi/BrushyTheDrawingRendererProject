@@ -1,0 +1,31 @@
+# Code::Blocks
+*.depend
+*.layout
+*.cbp.bak
+*.autosave
+
+# Compiled and objects
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.out
+
+# Common build folders
+/bin/
+/obj/
+/build/
+/dist/
+
+# Temporary files
+*~
+*.swp
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
