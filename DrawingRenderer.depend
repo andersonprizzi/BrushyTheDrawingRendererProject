@@ -492,3 +492,46 @@
 1757293490 source:d:\developmentworkspace\projects\personal-drawingrenderer\utils.cpp
 	"Utils.h"
 
+1757538764 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\shape.cpp
+	"Shape.h"
+
+1757545991 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\app.cpp
+	"App.h"
+
+1757540834 d:\developmentworkspace\projects\personal-drawingrenderer\headers\app.h
+	<SDL2/SDL.h>
+	<stdio.h>
+	<string>
+	<iostream>
+	<cstdio>
+	<cmath>
+	<stack>
+	"Utils.h"
+	"Primitives.h"
+	"Shape.h"
+	"Circle.h"
+
+1757532404 d:\developmentworkspace\projects\personal-drawingrenderer\headers\utils.h
+	"App.h"
+
+1757532398 d:\developmentworkspace\projects\personal-drawingrenderer\headers\primitives.h
+	"App.h"
+
+1757549894 d:\developmentworkspace\projects\personal-drawingrenderer\headers\shape.h
+	"App.h"
+
+1757533976 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\main.cpp
+	"App.h"
+
+1757534626 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\primitives.cpp
+	"Primitives.h"
+
+1757534634 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\utils.cpp
+	"Utils.h"
+
+1757549450 source:d:\developmentworkspace\projects\personal-drawingrenderer\sources\circle.cpp
+	"Circle.h"
+
+1757550532 d:\developmentworkspace\projects\personal-drawingrenderer\headers\circle.h
+	"App.h"
+

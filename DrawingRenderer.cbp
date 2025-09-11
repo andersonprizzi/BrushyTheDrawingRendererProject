@@ -40,15 +40,17 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="headers" />
 		</Compiler>
 		<Unit filename="headers/App.h" />
+		<Unit filename="headers/Circle.h" />
 		<Unit filename="headers/Primitives.h" />
 		<Unit filename="headers/Shape.h" />
 		<Unit filename="headers/Utils.h" />
 		<Unit filename="sources/App.cpp" />
+		<Unit filename="sources/Circle.cpp" />
 		<Unit filename="sources/Main.cpp" />
 		<Unit filename="sources/Primitives.cpp" />
-		<Unit filename="sources/Shape.cpp" />
 		<Unit filename="sources/Utils.cpp" />
 		<Extensions>
 			<DoxyBlocks>

@@ -38,6 +38,17 @@ App::App(const std::string& title, int width, int height) {
     }
 
     this->surface = SDL_GetWindowSurface(window);
+
+    SDL_Surface* icon = SDL_LoadBMP("images/Icon_64.bmp");
+
+    if (!icon) {
+        fprintf(stderr, "Error loading icon: %s\n", SDL_GetError());
+        SDL_Quit();
+        exit(1);
+    } else {
+        SDL_SetWindowIcon(this->window, icon);
+        SDL_FreeSurface(icon);
+    }
 }
 
 
@@ -63,7 +74,7 @@ App::~App() {
  */
 void App::run() {
     this->running = true;
-
+    bool rodou = false;
     while (running) {
         clear_screen(255, 255, 255);
 
@@ -75,14 +86,17 @@ void App::run() {
         Primitives::draw_line(this->surface, 0, 0, 500, 500, blue, true);
         Primitives::draw_line(this->surface, 200, 100, 450, 550, blue, false);
         Primitives::draw_curve(this->surface, 20, 10, 250, 200, 190, 350, 240, 420, red, true);
-        Primitives::draw_circle(this->surface, 300, 300, 100, black, true, false);
-        Primitives::draw_circle(this->surface, 450, 450, 100, green, false, false);
-        Primitives::draw_circle(this->surface, 100, 400, 50, green, false, true);
-        Primitives::draw_circle(this->surface, 480, 110, 50, red, true, true);
+        //Primitives::draw_circle(this->surface, 300, 300, 100, black, true, false);
+        //Primitives::draw_circle(this->surface, 450, 450, 100, green, false, false);
+        //Primitives::draw_circle(this->surface, 100, 400, 50, green, false, true);
+        //Primitives::draw_circle(this->surface, 480, 110, 50, red, true, true);
         Primitives::draw_ellipse(this->surface, 680, 89, 100, 50, red, false, false);
         Primitives::draw_ellipse(this->surface, 750, 450, 150, 50, black, false, true);
         Primitives::draw_ellipse(this->surface, 750, 300, 150, 50, black, true, true);
         Primitives::draw_ellipse(this->surface, 1050, 300, 100, 150, blue, true, false);
+
+        Circle *circle1 = new Circle(150, 400, 75, true, true, green);
+        circle1->draw(this->surface);
 
         /*
         // Criar um retângulo vermelho
