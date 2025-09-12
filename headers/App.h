@@ -13,8 +13,11 @@
 #include <cstdio>
 #include <cmath>
 #include <stack>
+#include <unordered_map>
+#include <strings.h>
 
 #include "Utils.h"
+#include "Colors.h"
 #include "Primitives.h"
 #include "Shape.h"
 #include "Circle.h"

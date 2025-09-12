@@ -344,10 +344,10 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
             float fy = float(yu - y_int);
 
             // Blend pixels based on distance to the exact curve point.
-            Primitives::blend_pixel(surface, x_int,     y_int,     Utils::uint32_to_sdlcolor(surface, color), (1.0f - fx) * (1.0f - fy));
-            Primitives::blend_pixel(surface, x_int + 1, y_int,     Utils::uint32_to_sdlcolor(surface, color), fx * (1.0f - fy));
-            Primitives::blend_pixel(surface, x_int,     y_int + 1, Utils::uint32_to_sdlcolor(surface, color), (1.0f - fx) * fy);
-            Primitives::blend_pixel(surface, x_int + 1, y_int + 1, Utils::uint32_to_sdlcolor(surface, color), fx * fy);
+            Primitives::blend_pixel(surface, x_int,     y_int,     Colors::uint32_to_sdlcolor(surface, color), (1.0f - fx) * (1.0f - fy));
+            Primitives::blend_pixel(surface, x_int + 1, y_int,     Colors::uint32_to_sdlcolor(surface, color), fx * (1.0f - fy));
+            Primitives::blend_pixel(surface, x_int,     y_int + 1, Colors::uint32_to_sdlcolor(surface, color), (1.0f - fx) * fy);
+            Primitives::blend_pixel(surface, x_int + 1, y_int + 1, Colors::uint32_to_sdlcolor(surface, color), fx * fy);
         } else {
             Primitives::set_pixel(surface, x_int, y_int, color);
         }
@@ -378,7 +378,7 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
     SDL_GetRGBA(color, surface->format, &lineColor.r, &lineColor.g, &lineColor.b, &lineColor.a);
 
     if (anti_aliasing) {
-        SDL_Color lineColor = Utils::uint32_to_sdlcolor(surface, color);
+        SDL_Color lineColor = Colors::uint32_to_sdlcolor(surface, color);
 
         int x_min = cx - radius - 1;
         int x_max = cx + radius + 1;
@@ -398,13 +398,13 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
 
                     if (coverage > 0.0f) {
                         Uint32 bgPixel = Primitives::get_pixel(surface, px, py);
-                        SDL_Color bgColor = Utils::uint32_to_sdlcolor(surface, bgPixel);
+                        SDL_Color bgColor = Colors::uint32_to_sdlcolor(surface, bgPixel);
 
                         Uint8 r = Uint8(bgColor.r * (1.0f - coverage) + lineColor.r * coverage);
                         Uint8 g = Uint8(bgColor.g * (1.0f - coverage) + lineColor.g * coverage);
                         Uint8 b = Uint8(bgColor.b * (1.0f - coverage) + lineColor.b * coverage);
 
-                        Uint32 newColor = Utils::rgb_to_uint32(surface, r, g, b);
+                        Uint32 newColor = Colors::rgb_to_uint32(surface, r, g, b);
                         Primitives::set_pixel(surface, px, py, newColor);
                     }
                 }
@@ -579,7 +579,7 @@ void Primitives::draw_bresenham_ellipse(SDL_Surface* surface, int cx, int cy, in
  * @param filled  If true, fill the ellipse; if false, draw only the anti-aliased border.
  */
 void Primitives::draw_supersampled_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int ry, Uint32 color, bool filled) {
-    SDL_Color lineColor = Utils::uint32_to_sdlcolor(surface, color);
+    SDL_Color lineColor = Colors::uint32_to_sdlcolor(surface, color);
     int samples = 4; // Subpixels per axis (4x4 = 16 subpixels per pixel).
 
     int marginX = rx / samples + 2;

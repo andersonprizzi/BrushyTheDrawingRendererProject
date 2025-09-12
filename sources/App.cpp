@@ -56,7 +56,7 @@ App::App(const std::string& title, int width, int height) {
 
 
 /**
- * \brief Implementation of the main application destructor.
+ * @brief Implementation of the main application destructor.
  */
 App::~App() {
     SDL_DestroyWindow(window);
@@ -78,10 +78,10 @@ void App::run() {
     while (running) {
         clear_screen(255, 255, 255);
 
-        Uint32 red = Utils::rgb_to_uint32(surface, 255, 0, 0);
-        Uint32 green = Utils::rgb_to_uint32(surface, 0, 255, 0);
-        Uint32 blue = Utils::rgb_to_uint32(surface, 0, 0, 255);
-        Uint32 black = Utils::rgb_to_uint32(surface, 0, 0, 0);
+        Uint32 red = Colors::get_color_by_name(this->surface, "red");
+        Uint32 green = Colors::get_color_by_name(this->surface, "green");
+        Uint32 blue = Colors::get_color_by_name(this->surface, "blue");
+        Uint32 black = Colors::get_color_by_name(this->surface, "black");
 
         Primitives::draw_line(this->surface, 0, 0, 500, 500, blue, true);
         Primitives::draw_line(this->surface, 200, 100, 450, 550, blue, false);
