@@ -13,15 +13,16 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add directory="C:/DevelopmentResources/SDL2/include" />
-					<Add directory="C:/SDL2/include" />
+					<Add directory="external/include/SDL2" />
+					<Add directory="external/include/SDL2_TTF" />
 				</Compiler>
 				<Linker>
-					<Add option="-lSDL2" />
-					<Add option="-lSDL2main" />
 					<Add option="-lmingw32" />
-					<Add directory="C:/DevelopmentResources/SDL2/lib" />
-					<Add directory="C:/SDL2/lib" />
+					<Add option="-lSDL2main" />
+					<Add option="-lSDL2" />
+					<Add option="-lSDL2_ttf" />
+					<Add directory="external/lib/SDL2" />
+					<Add directory="external/lib/SDL2_TTF" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -43,16 +44,28 @@
 			<Add directory="headers" />
 		</Compiler>
 		<Unit filename="headers/App.h" />
+		<Unit filename="headers/ButtonComponent.h" />
 		<Unit filename="headers/Circle.h" />
 		<Unit filename="headers/Colors.h" />
+		<Unit filename="headers/ErrorHandler.h" />
+		<Unit filename="headers/FontManager.h" />
+		<Unit filename="headers/ImageComponent.h" />
+		<Unit filename="headers/Point.h" />
 		<Unit filename="headers/Primitives.h" />
 		<Unit filename="headers/Shape.h" />
+		<Unit filename="headers/TextboxComponent.h" />
 		<Unit filename="headers/Utils.h" />
 		<Unit filename="sources/App.cpp" />
+		<Unit filename="sources/ButtonComponent.cpp" />
 		<Unit filename="sources/Circle.cpp" />
 		<Unit filename="sources/Colors.cpp" />
+		<Unit filename="sources/ErrorHandler.cpp" />
+		<Unit filename="sources/FontManager.cpp" />
+		<Unit filename="sources/ImageComponent.cpp" />
 		<Unit filename="sources/Main.cpp" />
+		<Unit filename="sources/Point.cpp" />
 		<Unit filename="sources/Primitives.cpp" />
+		<Unit filename="sources/TextboxComponent.cpp" />
 		<Unit filename="sources/Utils.cpp" />
 		<Extensions>
 			<DoxyBlocks>

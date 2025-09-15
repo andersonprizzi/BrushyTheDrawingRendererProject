@@ -1,19 +1,25 @@
 #include "Primitives.h"
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Sets the color of a specific pixel on an SDL_Surface.
+ * @brief
+ *      Sets the color of a specific pixel on an SDL_Surface.
+ *      This function writes a pixel with the given Uint32 color to the specified
+ *      coordinates (x, y) on the provided surface. It performs bounds checking
+ *      using Utils::verify_limits to prevent invalid memory access.
  *
- * This function writes a pixel with the given Uint32 color to the specified
- * coordinates (x, y) on the provided surface. It performs bounds checking
- * using Utils::verify_limits to prevent invalid memory access.
- *
- * @param surface Pointer to the SDL_Surface where the pixel will be set.
- * @param x X-coordinate of the pixel.
- * @param y Y-coordinate of the pixel.
- * @param color Uint32 value representing the color to set (in the surface's pixel format).
- */
+ * @param surface
+ *      Pointer to the SDL_Surface where the pixel will be set.
+ * @param x
+ *      X-coordinate of the pixel.
+ * @param y
+ *      Y-coordinate of the pixel.
+ * @param color
+ *      Uint32 value representing the color to set (in the surface's pixel format).
+ **/
 void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
     if (!surface) return;
     if (Utils::verify_limits(surface, x, y) == 0) return;
@@ -25,19 +31,27 @@ void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 /**
- * @brief Retrieves the color of a pixel from an SDL_Surface.
+ * @brief
+ *      Retrieves the color of a pixel from an SDL_Surface.
+ *      This function reads the pixel at coordinates (x, y) from the given surface
+ *      and returns it as a Uint32 value. The function handles different bytes-per-pixel
+ *      formats (1, 2, 3, or 4 bytes) and considers the system's endianness.
  *
- * This function reads the pixel at coordinates (x, y) from the given surface
- * and returns it as a Uint32 value. The function handles different bytes-per-pixel
- * formats (1, 2, 3, or 4 bytes) and considers the system's endianness.
+ * @param surface
+ *      Pointer to the SDL_Surface to read from.
+ * @param x
+ *      X-coordinate of the pixel.
+ * @param y
+ *      Y-coordinate of the pixel.
  *
- * @param surface Pointer to the SDL_Surface to read from.
- * @param x X-coordinate of the pixel.
- * @param y Y-coordinate of the pixel.
- *
- * @return Uint32 value representing the pixel color. Returns 0 if the coordinates
- *         are out of bounds or if an unexpected pixel format is encountered.
+ * @return
+ *      Uint32 value representing the pixel color. Returns 0 if the coordinates
+ *      are out of bounds or if an unexpected pixel format is encountered.
  */
 Uint32 Primitives::get_pixel(SDL_Surface* surface, int x, int y) {
     if (!Utils::verify_limits(surface, x, y)) {
@@ -71,6 +85,10 @@ Uint32 Primitives::get_pixel(SDL_Surface* surface, int x, int y) {
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * @brief Blends a color with the background pixel on the surface.
  *
@@ -101,6 +119,10 @@ void Primitives::blend_pixel(SDL_Surface* surface, int px, int py, SDL_Color lin
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws a line between two points on an SDL surface.
@@ -144,6 +166,10 @@ void Primitives::draw_line(SDL_Surface* surface, int x1, int y1, int x2, int y2,
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * @brief Draws a horizontal line on the given surface.
  *
@@ -169,6 +195,10 @@ void Primitives::draw_horizontal_line(SDL_Surface* surface, int x1, int x2, int 
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws a vertical line on the given surface.
@@ -196,6 +226,10 @@ void Primitives::draw_vertical_line(SDL_Surface* surface,int x, int y1, int y2, 
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws a line between two points using Bresenham's algorithm.
@@ -227,6 +261,10 @@ void Primitives::draw_bresenham_line(SDL_Surface* surface, int x1, int y1, int x
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws an anti-aliased colored line using Xiaolin Wu's algorithm.
@@ -297,6 +335,10 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * @brief Draws a cubic Bézier curve on an SDL_Surface with optional anti-aliasing.
  *
@@ -355,6 +397,10 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws a circle on an SDL_Surface with optional anti-aliasing and fill.
@@ -440,6 +486,10 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws an ellipse on an SDL surface, optionally with anti-aliasing.
@@ -559,6 +609,10 @@ void Primitives::draw_bresenham_ellipse(SDL_Surface* surface, int cx, int cy, in
 }
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION DEFINITION                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Draws an ellipse on an SDL surface using supersampling anti-aliasing (SSAA).
