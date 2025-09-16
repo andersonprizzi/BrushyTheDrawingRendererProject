@@ -21,6 +21,9 @@
 /build/
 /dist/
 
+# Untracked files
+/.private/
+
 # Temporary files
 *~
 *.swp
@@ -30,5 +33,6 @@
 .DS_Store
 Thumbs.db
 
+# Output files
 *.bmp
 /output/

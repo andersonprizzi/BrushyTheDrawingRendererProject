@@ -37,21 +37,23 @@ void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
 
 /**
  * @brief
- *      Retrieves the color of a pixel from an SDL_Surface.
- *      This function reads the pixel at coordinates (x, y) from the given surface
- *      and returns it as a Uint32 value. The function handles different bytes-per-pixel
- *      formats (1, 2, 3, or 4 bytes) and considers the system's endianness.
+ * Retrieves the color of a pixel from an SDL_Surface.
+ * This function reads the pixel at coordinates (x, y) from the given surface
+ * and returns it as a Uint32 value. The function handles different bytes-per-pixel
+ * formats (1, 2, 3, or 4 bytes) and considers the system's endianness.
  *
  * @param surface
- *      Pointer to the SDL_Surface to read from.
+ * Pointer to the SDL_Surface to read from.
+ *
  * @param x
- *      X-coordinate of the pixel.
+ * X-coordinate of the pixel.
+ *
  * @param y
- *      Y-coordinate of the pixel.
+ * Y-coordinate of the pixel.
  *
  * @return
- *      Uint32 value representing the pixel color. Returns 0 if the coordinates
- *      are out of bounds or if an unexpected pixel format is encountered.
+ * Uint32 value representing the pixel color. Returns 0 if the coordinates
+ * are out of bounds or if an unexpected pixel format is encountered.
  */
 Uint32 Primitives::get_pixel(SDL_Surface* surface, int x, int y) {
     if (!Utils::verify_limits(surface, x, y)) {

@@ -1,4 +1,10 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// INCLUDES                                                                            //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 #include "FontManager.h"
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // ATTRIBUTE INITIALIZATION                                                            //
@@ -12,9 +18,20 @@ TTF_Font* FontManager::roboto_semibold_20 = nullptr;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
+// METHOD IMPLEMENTATIONS                                                              //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief
+ *      This function attempts to load multiple fonts with specific sizes
+ *      from the assets/fonts directory. If any font fails to load, an
+ *      error is logged and the function returns false.
+ *
+ * @return true
+ *      If all fonts are loaded successfully.
+ * @return false
+ *      If any font fails to load.
+ */
 bool FontManager::load_fonts() {
     FontManager::libertinus_regular_36 = TTF_OpenFont("assets/fonts/LibertinusKeyboard-Regular.ttf", 36);
     if (!libertinus_regular_36) {
@@ -45,10 +62,12 @@ bool FontManager::load_fonts() {
 
 
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+/**
+ * @brief
+ *      This function ensures that each loaded font is properly closed
+ *      and sets the corresponding font pointers to nullptr to prevent
+ *      dangling references.
+ */
 void FontManager::close_fonts() {
     if (libertinus_regular_36) {
         TTF_CloseFont(libertinus_regular_36);

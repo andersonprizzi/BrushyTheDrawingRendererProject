@@ -52,6 +52,7 @@
 		<Unit filename="headers/ImageComponent.h" />
 		<Unit filename="headers/Point.h" />
 		<Unit filename="headers/Primitives.h" />
+		<Unit filename="headers/Rectangle.h" />
 		<Unit filename="headers/Shape.h" />
 		<Unit filename="headers/TextboxComponent.h" />
 		<Unit filename="headers/Utils.h" />
@@ -65,6 +66,7 @@
 		<Unit filename="sources/Main.cpp" />
 		<Unit filename="sources/Point.cpp" />
 		<Unit filename="sources/Primitives.cpp" />
+		<Unit filename="sources/Rectangle.cpp" />
 		<Unit filename="sources/TextboxComponent.cpp" />
 		<Unit filename="sources/Utils.cpp" />
 		<Extensions>

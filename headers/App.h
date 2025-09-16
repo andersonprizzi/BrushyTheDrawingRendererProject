@@ -3,22 +3,29 @@
 
 #define SDL_MAIN_HANDLED
 
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <stdio.h>
+// C++ standard library.
 #include <string>
 #include <iostream>
-#include <cstdio>
 #include <cmath>
 #include <stack>
 #include <unordered_map>
-#include <strings.h>
-#include <cstdarg>
+//#include <filesystem>
 
+// C standard library.
+#include <cstdio>
+#include <cstdarg>
+#include <strings.h>
+
+// External libraries.
+#include <SDL.h>
+#include <SDL_ttf.h>
+
+// Header files.
 #include "ErrorHandler.h"
 #include "FontManager.h"
 #include "Colors.h"
 #include "Utils.h"
+#include "Point.h"
 #include "Primitives.h"
 #include "ButtonComponent.h"
 #include "TextboxComponent.h"
