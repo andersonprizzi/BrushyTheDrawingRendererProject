@@ -30,6 +30,7 @@
 #include "ButtonComponent.h"
 #include "TextboxComponent.h"
 #include "ImageComponent.h"
+#include "AppBarComponent.h"
 #include "Shape.h"
 #include "Circle.h"
 

@@ -1,4 +1,10 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// INCLUDES                                                                            //
+/////////////////////////////////////////////////////////////////////////////////////////
+
 #include "App.h"
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // ATTRIBUTE INITIALIZATION                                                            //
@@ -124,6 +130,10 @@ void App::exit_app() {
 void App::run() {
     this->running = true;
 
+    AppBar appBar(this->window_width, 50, "Creating a new project", FontManager::roboto_semibold_20);
+    appBar.setBackgroundColor({255, 255, 255, 255});
+    appBar.setTextColor({0, 0, 0, 255});
+
     // Initializing screen components.
     int btn_w = 300;
     int icon_x = (window_width - 256) / 2;
@@ -223,7 +233,9 @@ void App::run() {
             }
 
         } else if (this->app_state == AppState::NEW_PROJECT_SCREEN) {
-            clear_screen(255, 255, 255);
+            clear_screen(240, 240, 240);
+
+            appBar.draw(surface);
 
             if (text_enter_width && text_enter_height) {
                 textRect.w = text_enter_width->w;
