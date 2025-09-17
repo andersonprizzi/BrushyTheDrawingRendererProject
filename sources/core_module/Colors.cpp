@@ -1,4 +1,3 @@
-// INCLUDES
 #include "Colors.h"
 
 
@@ -67,24 +66,6 @@ SDL_Color Colors::uint32_to_sdlcolor(SDL_Surface* surface, Uint32 color) {
     SDL_Color sdlColor;
     SDL_GetRGBA(color, surface->format, &sdlColor.r, &sdlColor.g, &sdlColor.b, &sdlColor.a);
     return sdlColor;
-}
-
-
-// METHOD IMPLEMENTATION
-Uint32 Colors::get_color_by_name(SDL_Surface* surface, const std::string& name) {
-    for (int i = 0; i < number_of_drawing_colors; i++) {
-        if (strcasecmp(drawing_colors_table[i].name, name.c_str()) == 0) {
-            return Colors::rgb_to_uint32(
-                surface,
-                drawing_colors_table[i].color.r,
-                drawing_colors_table[i].color.g,
-                drawing_colors_table[i].color.b
-            );
-        }
-    }
-
-    // If not found, returns black by default.
-    return Colors::rgb_to_uint32(surface, 0, 0, 0);
 }
 
 

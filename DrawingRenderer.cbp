@@ -60,7 +60,7 @@
 		<Unit filename="headers/graphics_module/TextboxComponent.h" />
 		<Unit filename="headers/shapes_module/Circle.h" />
 		<Unit filename="headers/shapes_module/Point.h" />
-		<Unit filename="headers/shapes_module/Rectangle.h" />
+		<Unit filename="headers/shapes_module/Polygon.h" />
 		<Unit filename="headers/shapes_module/Shape.h" />
 		<Unit filename="sources/core_module/App.cpp" />
 		<Unit filename="sources/core_module/Colors.cpp" />
@@ -77,7 +77,7 @@
 		<Unit filename="sources/graphics_module/TextboxComponent.cpp" />
 		<Unit filename="sources/shapes_module/Circle.cpp" />
 		<Unit filename="sources/shapes_module/Point.cpp" />
-		<Unit filename="sources/shapes_module/Rectangle.cpp" />
+		<Unit filename="sources/shapes_module/Polygon.cpp" />
 		<Unit filename="sources/shapes_module/Shape.cpp" />
 		<Extensions>
 			<DoxyBlocks>

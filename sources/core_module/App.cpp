@@ -193,7 +193,7 @@ void App::run() {
     // Execution loop.
     while (running) {
         if (this->app_state == AppState::MENU_SCREEN) {
-            clear_screen(255, 255, 255);
+            clear_screen(Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "white"));
             new_drawing_button->draw(surface);
             load_project_button->draw(surface);
             app_icon_image->draw(surface);
@@ -247,28 +247,39 @@ void App::run() {
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
             clear_screen(255, 255, 255);
 
-            Uint32 red = Colors::get_color_by_name(this->surface, "red");
-            Uint32 green = Colors::get_color_by_name(this->surface, "green");
-            Uint32 blue = Colors::get_color_by_name(this->surface, "blue");
-            Uint32 black = Colors::get_color_by_name(this->surface, "black");
+            // Test colors - Remove at the end.
+            Uint32 red = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "red");
+            Uint32 green = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "green");
+            Uint32 blue = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "blue");
+            Uint32 black = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
 
-            Primitives::draw_line(this->surface, 0, 0, 500, 500, blue, true);
-            Primitives::draw_line(this->surface, 200, 100, 450, 550, blue, false);
-            Primitives::draw_curve(this->surface, 20, 10, 250, 200, 190, 350, 240, 420, red, true);
-            Primitives::draw_circle(this->surface, 300, 300, 100, black, true, false);
+            //Primitives::draw_line(this->surface, 0, 0, 500, 500, blue, true);
+            //Primitives::draw_line(this->surface, 200, 100, 450, 550, blue, false);
+            //Primitives::draw_curve(this->surface, 20, 10, 250, 200, 190, 350, 240, 420, red, true);
+            //Primitives::draw_circle(this->surface, 150, 150, 100, black, true, false);
+            //Primitives::flood_fill(this->surface, 150, 150, red);
             //Primitives::draw_circle(this->surface, 450, 450, 100, green, false, false);
             //Primitives::draw_circle(this->surface, 100, 400, 50, green, false, true);
             //Primitives::draw_circle(this->surface, 480, 110, 50, red, true, true);
-            Primitives::draw_ellipse(this->surface, 680, 89, 100, 50, red, false, false);
-            Primitives::draw_ellipse(this->surface, 750, 450, 150, 50, black, false, true);
-            Primitives::draw_ellipse(this->surface, 750, 300, 150, 50, black, true, true);
-            Primitives::draw_ellipse(this->surface, 1050, 300, 100, 150, blue, true, false);
+            //Primitives::draw_ellipse(this->surface, 680, 89, 100, 50, red, false, false);
+            //Primitives::draw_ellipse(this->surface, 750, 450, 150, 50, black, false, true);
+            //Primitives::draw_ellipse(this->surface, 750, 300, 150, 50, black, true, true);
+            //Primitives::draw_ellipse(this->surface, 1050, 300, 100, 150, blue, true, false);
 
-            Circle *circle1 = new Circle(150, 400, 75, true, true, green);
-            circle1->draw(this->surface);
+            Polygon *polygon_1 = new Polygon(true, false, green);
+            polygon_1->add_point(Point(350, 400));
+            polygon_1->add_point(Point(260, 300));
+            polygon_1->add_point(Point(268, 250));
+            polygon_1->draw(this->surface);
+
+            Polygon *polygon_2 = new Polygon(false, true, green, green, Point(110, 120));
+            polygon_2->add_point(Point(100, 100));
+            polygon_2->add_point(Point(200, 100));
+            polygon_2->add_point(Point(200, 200));
+            polygon_2->add_point(Point(100, 200));
+            polygon_2->draw(this->surface);
 
             /*
-            // Criar um retângulo vermelho
             Rectangle rect(50, 50, 200, 150, red);
             rect.draw(surface, true);
 
@@ -396,7 +407,7 @@ void App::handle_events() {
                 } else {
                     this->notification_manager->push({
                         "Warning!",
-                        "The specified width or height is below the minimum allowed.",
+                        "The specified width or height is below the minimum allowed or above your monitor's resolution.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
                 }

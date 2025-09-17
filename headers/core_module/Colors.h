@@ -16,7 +16,6 @@ class Colors {
 
         static Uint32 rgb_to_uint32(SDL_Surface* surface, int r, int g, int b);
         static SDL_Color uint32_to_sdlcolor(SDL_Surface* surface, Uint32 color);
-        static Uint32 get_color_by_name(SDL_Surface* surface, const std::string& name);
         static Uint32 get_color(SDL_Surface* surface, const Colors::ColorItem* color_table, const int table_size, const std::string& color_name);
 
         static const int number_of_drawing_colors;

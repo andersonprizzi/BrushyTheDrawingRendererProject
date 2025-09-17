@@ -13,9 +13,9 @@ class NotificationManager;
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include <stack>
 #include <queue>
-#include <unordered_map>
 #include <algorithm>
 
 // C standard library.
@@ -42,6 +42,7 @@ class NotificationManager;
 #include "AppBarComponent.h"
 #include "Shape.h"
 #include "Circle.h"
+#include "Polygon.h"
 
 enum class AppState {
     MENU_SCREEN,
@@ -61,6 +62,7 @@ class App {
         int window_height;
         std::string window_title;
         AppState app_state;
+        NotificationManager *notification_manager;
 
         // Graphical interface attributes.
         static float new_drawing_button_relative_x_percent;
@@ -74,12 +76,10 @@ class App {
         ButtonComponent* back_menu_button;
         TextboxComponent* width_textbox;
         TextboxComponent* height_textbox;
-
         SDL_Surface* text_title_surface;
         SDL_Surface* text_enter_height_surface;
         SDL_Surface* text_enter_width_surface;
         SDL_Rect text_rect;
-        NotificationManager *notification_manager;
 
     public:
         App(const std::string& title, float width_percent, float height_percent);

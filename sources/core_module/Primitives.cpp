@@ -625,71 +625,6 @@ void Primitives::draw_supersampled_ellipse(SDL_Surface* surface, int cx, int cy,
 }
 
 
-
-
-
-
-
-
-
-//// Flood-fill (pilha iterativa)
-//void Primitives::floodFill(SDL_Surface* surface, int x, int y, Uint32 fillColor, Uint32 borderColor) {
-//    if (!surface) return;
-//    Uint32* pixels = (Uint32*)surface->pixels;
-//    int pitch = surface->pitch / 4;
-//
-//    auto getPixel = [&](int px, int py) -> Uint32 {
-//        return pixels[py * pitch + px];
-//    };
-//
-//    std::stack<std::pair<int,int>> stack;
-//    stack.push({x,y});
-//
-//    while (!stack.empty()) {
-//        auto [px, py] = stack.top();
-//        stack.pop();
-//
-//        if (px < 0 || py < 0 || px >= surface->w || py >= surface->h) continue;
-//
-//        if (getPixel(px, py) != borderColor && getPixel(px, py) != fillColor) {
-//            setPixel(surface, px, py, fillColor);
-//            stack.push({px+1, py});
-//            stack.push({px-1, py});
-//            stack.push({px, py+1});
-//            stack.push({px, py-1});
-//        }
-//    }
-//}
-//
-//// ===============================================
-//// Flood fill com  (algoritmo de preenchimento)
-//// Pinta shape com base na cor, usando o pixel de referência (x,y) como cor dos pixels que será substituída pela fillColor
-//// ===============================================
-//void Primitives::floodFill(SDL_Surface* surface, int x, int y, Uint32 fillColor) {
-//    Uint32 targetColor = getPixel(surface, x, y);
-//    if (targetColor == fillColor) return;
-//
-//    std::stack<std::pair<int,int>> pixels;
-//    pixels.push({x,y});
-//
-//    while (!pixels.empty()) {
-//        auto [px, py] = pixels.top();
-//        pixels.pop();
-//
-//        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h) continue;
-//        if (getPixel(surface, px, py) != targetColor) continue;
-//
-//        Uint32* pixelAddr = (Uint32*)((Uint8*)surface->pixels + py * surface->pitch + px * 4);
-//        *pixelAddr = fillColor;
-//
-//        pixels.push({px+1, py});
-//        pixels.push({px-1, py});
-//        pixels.push({px, py+1});
-//        pixels.push({px, py-1});
-//    }
-//}
-
-
 // METHOD IMPLEMENTATION
 // Essa função pega uma string, renderiza-a como imagem (com a fonte e cor especificadas) e desenha esse texto na superfície alvo na posição (x, y)
 void Primitives::draw_text(SDL_Surface* target, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color) {
@@ -703,3 +638,55 @@ void Primitives::draw_text(SDL_Surface* target, TTF_Font* font, const std::strin
     SDL_FreeSurface(text_surf);
 }
 
+
+// METHOD IMPLEMENTATION
+// Flood fill com  (algoritmo de preenchimento)
+// Pinta shape com base na cor, usando o pixel de referência (x,y) como cor dos pixels que será substituída pela fillColor
+// Se a pilha enche, o algoritmo apenas deixa de pintar pixels que precisariam ser processados, não dá erro.
+void Primitives::flood_fill(SDL_Surface* surface, int x, int y, Uint32 fill_color) {
+    if (!surface) return;
+
+    Uint32 targetColor = get_pixel(surface, x, y);
+    if (targetColor == fill_color) return;
+
+    // Buffer para a pilha (simples, tamanho fixo)
+    const int MAX_STACK = 100000;
+    int stack_x[MAX_STACK];
+    int stack_y[MAX_STACK];
+    int stack_top = 0;
+
+    // Push inicial
+    stack_x[stack_top] = x;
+    stack_y[stack_top] = y;
+    stack_top++;
+
+    while (stack_top > 0) {
+        // Pop
+        stack_top--;
+        int px = stack_x[stack_top];
+        int py = stack_y[stack_top];
+
+        // Limites da surface
+        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h) continue;
+        if (get_pixel(surface, px, py) != targetColor) continue;
+
+        // Pinta pixel
+        set_pixel(surface, px, py, fill_color);
+
+        // Push vizinhos
+        if (stack_top + 4 < MAX_STACK) {
+            stack_x[stack_top] = px + 1;
+            stack_y[stack_top] = py;
+            stack_top++;
+            stack_x[stack_top] = px - 1;
+            stack_y[stack_top] = py;
+            stack_top++;
+            stack_x[stack_top] = px;
+            stack_y[stack_top] = py + 1;
+            stack_top++;
+            stack_x[stack_top] = px;
+            stack_y[stack_top] = py - 1;
+            stack_top++;
+        }
+    }
+}
