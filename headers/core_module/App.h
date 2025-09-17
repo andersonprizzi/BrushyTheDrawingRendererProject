@@ -32,6 +32,7 @@ class NotificationManager;
 #include "Utils.h"
 #include "ErrorHandler.h"
 #include "FontManager.h"
+#include "Notification.h"
 #include "NotificationManager.h"
 #include "Point.h"
 #include "Primitives.h"
@@ -70,13 +71,14 @@ class App {
         ButtonComponent* new_drawing_button;
         ButtonComponent* load_project_button;
         ButtonComponent* create_project_button;
+        ButtonComponent* back_menu_button;
         TextboxComponent* width_textbox;
         TextboxComponent* height_textbox;
 
-        SDL_Surface* textSurface;
-        SDL_Surface* text_enter_height;
-        SDL_Surface* text_enter_width;
-        SDL_Rect textRect;
+        SDL_Surface* text_title_surface;
+        SDL_Surface* text_enter_height_surface;
+        SDL_Surface* text_enter_width_surface;
+        SDL_Rect text_rect;
         NotificationManager *notification_manager;
 
     public:

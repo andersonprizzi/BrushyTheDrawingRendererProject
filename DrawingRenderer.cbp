@@ -50,6 +50,7 @@
 		<Unit filename="headers/core_module/Colors.h" />
 		<Unit filename="headers/core_module/ErrorHandler.h" />
 		<Unit filename="headers/core_module/FontManager.h" />
+		<Unit filename="headers/core_module/Notification.h" />
 		<Unit filename="headers/core_module/NotificationManager.h" />
 		<Unit filename="headers/core_module/Primitives.h" />
 		<Unit filename="headers/core_module/Utils.h" />
@@ -66,6 +67,7 @@
 		<Unit filename="sources/core_module/ErrorHandler.cpp" />
 		<Unit filename="sources/core_module/FontManager.cpp" />
 		<Unit filename="sources/core_module/Main.cpp" />
+		<Unit filename="sources/core_module/Notification.cpp" />
 		<Unit filename="sources/core_module/NotificationManager.cpp" />
 		<Unit filename="sources/core_module/Primitives.cpp" />
 		<Unit filename="sources/core_module/Utils.cpp" />

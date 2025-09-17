@@ -25,8 +25,9 @@ const Colors::ColorItem Colors::drawing_colors_table[] = {
 
 // STATIC ATTRIBUTE INITIALIZATION
 const Colors::ColorItem Colors::interface_colors_table[] = {
-    {"primary_background_button",     {255, 255, 255}},
-    {"secondary_background_button",   {255, 255, 255}},
+    {"primary_background_button",     {95, 95, 95}},
+    {"secondary_background_button",   {0, 89, 173}},
+    {"button_text_color",             {255, 255, 255}},
     {"primary_background_window",     {240, 240, 240}},
 };
 
@@ -39,7 +40,7 @@ const int Colors::number_of_interface_colors = sizeof(Colors::interface_colors_t
 // METHOD IMPLEMENTATION
 /**
  * @brief
- * This function maps the given red, green, and blue components
+ * This method maps the given red, green, and blue components
  * into a single Uint32 value according to the pixel format of
  * the provided SDL_Surface. The resulting color value can then
  * be used to draw on that surface.

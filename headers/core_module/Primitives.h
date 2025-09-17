@@ -26,6 +26,8 @@ class Primitives {
 
         // Flood fill
         //static void floodFill(SDL_Surface* surface, int x, int y, Uint32 fillColor);
+
+        static void draw_text(SDL_Surface* target, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color);
 };
 
 #endif

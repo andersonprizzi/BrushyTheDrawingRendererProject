@@ -69,7 +69,7 @@ App::App(const std::string& title, float width_percent, float height_percent) {
 
     // Initializing notification manager.
     this->notification_manager = new NotificationManager(this->window_width, this->window_height);
-    this->notification_manager->set_fonts(FontManager::roboto_semibold_20, FontManager::roboto_semibold_20);
+    this->notification_manager->set_fonts(FontManager::default_notification_title_font, FontManager::default_notification_message_font);
 
     // Initializing app icon.
     SDL_Surface* icon = SDL_LoadBMP("assets/Icon_64.bmp");
@@ -87,18 +87,6 @@ App::App(const std::string& title, float width_percent, float height_percent) {
 void App::run() {
     this->running = true;
 
-    Notification n;
-    n.title = "Warning!";
-    n.message = "Message from GOD.";
-    n.rect = { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 };
-    n.close_button = { n.rect.w - 28, 8, 20, 20 };
-    n.duration_ms = 6000;
-
-    this->notification_manager->push(n);
-
-    AppBar app_bar(this->window_width, 50, "Creating a new project", FontManager::roboto_semibold_20);
-    app_bar.setBackgroundColor({255, 255, 255, 255});
-    app_bar.setTextColor({0, 0, 0, 255});
 
     // Initializing screen components.
     int btn_w = 300;
@@ -106,37 +94,47 @@ void App::run() {
     int icon_y = 10;
     int icon_w = 256;
     int icon_h = 256;
+    int textbox_w = 300;
+    int textbox_h = 40;
+    int textbox_x = 50;
+    int textbox_y = 100;
+
+
+    // Initializing the app bar.
+    AppBar app_bar(this->window_width, 50, "Creating a new project", FontManager::roboto_semibold_20);
+    app_bar.setBackgroundColor({255, 255, 255, 255});
+    app_bar.setTextColor({0, 0, 0, 255});
+
 
     // Renderiza o texto para uma surface
     SDL_Color textColor = {0, 0, 0}; // preto
-    textSurface = TTF_RenderText_Blended(FontManager::libertinus_regular_36, "BRUSHY", textColor);
-    text_enter_height = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter height:", textColor);
-    text_enter_width = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter width:", textColor);
+    text_title_surface = TTF_RenderText_Blended(FontManager::libertinus_regular_36, "BRUSHY", textColor);
+    text_enter_height_surface = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter height:", textColor);
+    text_enter_width_surface = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter width:", textColor);
 
-    if (!textSurface) {
-        fprintf(stderr, "Erro ao renderizar texto: %s\n", TTF_GetError());
-    } else {
-        textRect.w = textSurface->w;
-        textRect.h = textSurface->h;
-        textRect.x = (window_width - textRect.w) / 2;
-        textRect.y = icon_y + icon_h + 10;
+    if (!text_title_surface || !text_enter_width_surface || !text_enter_height_surface) {
+        ErrorHandler::fatal_error("There was a problem rendering text: %s.\n", TTF_GetError());
     }
 
+
+    // Creating image components.
     this->app_icon_image = new ImageComponent(
         "assets/Icon_256.bmp",
         icon_x,
         icon_y
     );
 
+
+    // Creating button components.
     this->new_drawing_button = new ButtonComponent(
         static_cast<int>(window_width * this->new_drawing_button_relative_x_percent - btn_w / 2),
         static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2),
         btn_w,
         this->default_button_height,
-        Colors::get_color_by_name(surface, "silver"),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Start a new drawing",
         FontManager::roboto_semibold_20,
-        {0, 0, 0}
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
     this->load_project_button = new ButtonComponent(
@@ -144,10 +142,10 @@ void App::run() {
         static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2) + this->default_button_height + 15,
         btn_w,
         this->default_button_height,
-        Colors::get_color_by_name(surface, "silver"),
-        "Open description file",
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Open project file",
         FontManager::roboto_semibold_20,
-        {0, 0, 0}
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
     this->create_project_button = new ButtonComponent(
@@ -155,18 +153,25 @@ void App::run() {
         static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2),
         btn_w,
         this->default_button_height,
-        Colors::get_color_by_name(surface, "silver"),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "secondary_background_button"),
         "Create project",
         FontManager::roboto_semibold_20,
-        {0, 0, 0}
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
-    // Criar a textbox (aceita apenas números)
-    int textbox_w = 300;
-    int textbox_h = 40;
-    int textbox_x = 50;
-    int textbox_y = 100;
+    this->back_menu_button = new ButtonComponent(
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - btn_w / 2),
+        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2) + this->default_button_height + 15,
+        btn_w,
+        this->default_button_height,
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Back to menu",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
 
+
+    // Creating textbox components.
     width_textbox = new TextboxComponent(
         static_cast<int>(window_width * this->load_file_button_relative_x_percent - textbox_w / 2),
         textbox_y,
@@ -193,9 +198,11 @@ void App::run() {
             load_project_button->draw(surface);
             app_icon_image->draw(surface);
 
-            if (textSurface) {
-                SDL_BlitSurface(textSurface, NULL, surface, &textRect);
-            }
+            text_rect.w = text_title_surface->w;
+            text_rect.h = text_title_surface->h;
+            text_rect.x = (window_width - text_rect.w) / 2;
+            text_rect.y = icon_y + icon_h + 10;
+            SDL_BlitSurface(text_title_surface, NULL, surface, &text_rect);
 
         } else if (this->app_state == AppState::NEW_PROJECT_SCREEN) {
             // Enables text input only if any textbox is active.
@@ -211,18 +218,19 @@ void App::run() {
             // Draw the app bar.
             app_bar.draw(this->surface);
 
-            if (text_enter_width && text_enter_height) {
-                textRect.w = text_enter_width->w;
-                textRect.h = text_enter_width->h;
-                textRect.x = (window_width - textRect.w) / 2;
-                textRect.y = width_textbox->rect.y - 30;
-                SDL_BlitSurface(text_enter_width, NULL, surface, &textRect);
+            // Draws textbox captions.
+            if (text_enter_width_surface && text_enter_height_surface) {
+                text_rect.w = text_enter_width_surface->w;
+                text_rect.h = text_enter_width_surface->h;
+                text_rect.x = (window_width - text_rect.w) / 2;
+                text_rect.y = width_textbox->rect.y - 30;
+                SDL_BlitSurface(text_enter_width_surface, NULL, surface, &text_rect);
 
-                textRect.w = text_enter_height->w;
-                textRect.h = text_enter_height->h;
-                textRect.x = (window_width - textRect.w) / 2;
-                textRect.y = height_textbox->rect.y - 30;
-                SDL_BlitSurface(text_enter_height, NULL, surface, &textRect);
+                text_rect.w = text_enter_height_surface->w;
+                text_rect.h = text_enter_height_surface->h;
+                text_rect.x = (window_width - text_rect.w) / 2;
+                text_rect.y = height_textbox->rect.y - 30;
+                SDL_BlitSurface(text_enter_height_surface, NULL, surface, &text_rect);
             }
 
             if (width_textbox) {
@@ -234,6 +242,7 @@ void App::run() {
             }
 
             create_project_button->draw(surface);
+            back_menu_button->draw(surface);
 
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
             clear_screen(255, 255, 255);
@@ -295,7 +304,7 @@ void App::run() {
 
 // METHOD IMPLEMENTATION
 void App::close(int exit_code) {
-    if (textSurface) SDL_FreeSurface(textSurface);
+    if (text_title_surface) SDL_FreeSurface(text_title_surface);
 
     if (width_textbox) {
         delete width_textbox;
@@ -363,14 +372,20 @@ void App::handle_events() {
             // Screen change: NEW_PROJECT_SCREEN > RENDERING_SCREEN
             } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && create_project_button->is_clicked(mx, my)) {
                 if (width_textbox->getText().empty()) {
-                    printf("Textbox vazia!\n");
-                    // TODO: Handle error.
+                    this->notification_manager->push({
+                        "Warning!",
+                        "The width field is required.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
                     continue;
                 }
 
                 if (height_textbox->getText().empty()) {
-                    printf("Textbox vazia!\n");
-                    // TODO: Handle error.
+                    this->notification_manager->push({
+                        "Warning!",
+                        "The height field is required.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
                     continue;
                 }
 
@@ -379,9 +394,16 @@ void App::handle_events() {
                     SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
                     this->app_state = AppState::RENDERING_SCREEN;
                 } else {
-                    // Tamanho inválido. Muito pequeno.
-                    // TODO: Handle error.
+                    this->notification_manager->push({
+                        "Warning!",
+                        "The specified width or height is below the minimum allowed.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
                 }
+
+            // Screen change: NEW_PROJECT_SCREEN > MENU_SCREEN
+            } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && back_menu_button->is_clicked(mx, my)) {
+                this->app_state = AppState::MENU_SCREEN;
             }
         }
 

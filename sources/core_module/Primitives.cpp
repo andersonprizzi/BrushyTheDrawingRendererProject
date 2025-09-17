@@ -1,9 +1,6 @@
 #include "Primitives.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief
  *      Sets the color of a specific pixel on an SDL_Surface.
@@ -30,11 +27,7 @@ void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief
  * Retrieves the color of a pixel from an SDL_Surface.
@@ -86,11 +79,7 @@ Uint32 Primitives::get_pixel(SDL_Surface* surface, int x, int y) {
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Blends a color with the background pixel on the surface.
  *
@@ -121,11 +110,7 @@ void Primitives::blend_pixel(SDL_Surface* surface, int px, int py, SDL_Color lin
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a line between two points on an SDL surface.
  *
@@ -167,11 +152,7 @@ void Primitives::draw_line(SDL_Surface* surface, int x1, int y1, int x2, int y2,
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a horizontal line on the given surface.
  *
@@ -197,11 +178,7 @@ void Primitives::draw_horizontal_line(SDL_Surface* surface, int x1, int x2, int 
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a vertical line on the given surface.
  *
@@ -228,11 +205,7 @@ void Primitives::draw_vertical_line(SDL_Surface* surface,int x, int y1, int y2, 
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a line between two points using Bresenham's algorithm.
  *
@@ -263,11 +236,7 @@ void Primitives::draw_bresenham_line(SDL_Surface* surface, int x1, int y1, int x
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws an anti-aliased colored line using Xiaolin Wu's algorithm.
  *
@@ -336,11 +305,7 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a cubic Bézier curve on an SDL_Surface with optional anti-aliasing.
  *
@@ -399,11 +364,7 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws a circle on an SDL_Surface with optional anti-aliasing and fill.
  *
@@ -485,11 +446,7 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws an ellipse on an SDL surface, optionally with anti-aliasing.
  *
@@ -521,7 +478,7 @@ void Primitives::draw_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int 
 }
 
 
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws an ellipse on an SDL surface using the Bresenham midpoint algorithm.
  *
@@ -608,11 +565,7 @@ void Primitives::draw_bresenham_ellipse(SDL_Surface* surface, int cx, int cy, in
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITION                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 /**
  * @brief Draws an ellipse on an SDL surface using supersampling anti-aliasing (SSAA).
  *
@@ -736,4 +689,17 @@ void Primitives::draw_supersampled_ellipse(SDL_Surface* surface, int cx, int cy,
 //    }
 //}
 
+
+// METHOD IMPLEMENTATION
+// Essa função pega uma string, renderiza-a como imagem (com a fonte e cor especificadas) e desenha esse texto na superfície alvo na posição (x, y)
+void Primitives::draw_text(SDL_Surface* target, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color) {
+    if (!target || !font) return;
+
+    SDL_Surface* text_surf = TTF_RenderUTF8_Blended(font, text.c_str(), color);
+    if (!text_surf) return;
+
+    SDL_Rect dest = { x, y, text_surf->w, text_surf->h };
+    SDL_BlitSurface(text_surf, NULL, target, &dest);
+    SDL_FreeSurface(text_surf);
+}
 

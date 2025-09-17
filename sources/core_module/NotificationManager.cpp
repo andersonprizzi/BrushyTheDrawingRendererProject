@@ -1,24 +1,11 @@
 #include "NotificationManager.h"
 
-void render_text(SDL_Surface* target, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color)
-{
-    if (!target || !font) return;
-
-    SDL_Surface* text_surf = TTF_RenderUTF8_Blended(font, text.c_str(), color);
-    if (!text_surf) return;
-
-    SDL_Rect dest = { x, y, text_surf->w, text_surf->h };
-    SDL_BlitSurface(text_surf, NULL, target, &dest);
-    SDL_FreeSurface(text_surf);
-}
-
-
 
 NotificationManager::NotificationManager(int w, int h)
-    : window_width_(w), window_height_(h), current_(nullptr) {}
+    : window_width_(w), window_height_(h), has_current_(false) {}
 
 NotificationManager::~NotificationManager() {
-    if (current_) delete current_;
+    // nada para liberar, pois usamos valores (não ponteiros dinâmicos)
 }
 
 void NotificationManager::push(const Notification& n) {
@@ -26,86 +13,85 @@ void NotificationManager::push(const Notification& n) {
 }
 
 void NotificationManager::update() {
-    if (!current_ && !queue_.empty()) {
-        current_ = new Notification(queue_.front());
+    if (!has_current_ && !queue_.empty()) {
+        current_ = queue_.front();
         queue_.pop();
 
-        current_->start_time = SDL_GetTicks();
-        current_->appearing = true;
-        current_->disappearing = false;
-        current_->alpha = 0.0f;
-        current_->pos_y = (float)(window_height_ + current_->rect.h);
+        current_.start_time = SDL_GetTicks();
+        current_.appearing = true;
+        current_.disappearing = false;
+        current_.alpha = 0.0f;
+        current_.pos_y = (float)(window_height_ + current_.rect.h);
+
+        has_current_ = true;
     }
 
     update_current();
 }
 
 void NotificationManager::update_current() {
-    if (!current_) return;
+    if (!has_current_) return;
 
-    Notification* n = current_;
+    Notification& n = current_;
     Uint32 now = SDL_GetTicks();
 
     const float slide_speed = 5.0f;
     const float fade_step = 15.0f;
 
     // Slide + fade in
-    if (n->appearing) {
-        n->pos_y -= slide_speed;
-        n->alpha += fade_step;
-        if (n->pos_y <= n->rect.y) {
-            n->pos_y = (float)n->rect.y;
-            n->alpha = 255.0f;
-            n->appearing = false;
+    if (n.appearing) {
+        n.pos_y -= slide_speed;
+        n.alpha += fade_step;
+        if (n.pos_y <= n.rect.y) {
+            n.pos_y = (float)n.rect.y;
+            n.alpha = 255.0f;
+            n.appearing = false;
         }
     }
 
     // Fechamento automático
-    if (!n->appearing && !n->disappearing && (now - n->start_time > n->duration_ms)) {
-        n->disappearing = true;
+    if (!n.appearing && !n.disappearing && (now - n.start_time > n.duration_ms)) {
+        n.disappearing = true;
     }
 
     // Slide + fade out
-    if (n->disappearing) {
-        n->pos_y += slide_speed;
-        n->alpha -= fade_step;
-        if (n->alpha <= 0.0f) {
-            delete current_;
-            current_ = nullptr;
+    if (n.disappearing) {
+        n.pos_y += slide_speed;
+        n.alpha -= fade_step;
+        if (n.alpha <= 0.0f) {
+            has_current_ = false; // liberamos o slot
             return;
         }
     }
 
     // clamp
-    if (n->alpha > 255.0f) n->alpha = 255.0f;
-    if (n->alpha < 0.0f) n->alpha = 0.0f;
+    if (n.alpha > 255.0f) n.alpha = 255.0f;
+    if (n.alpha < 0.0f) n.alpha = 0.0f;
 }
 
-void NotificationManager::handle_event(SDL_Event* e) {
-    if (!current_ || !e) return;
 
-    Notification* n = current_;
+
+void NotificationManager::handle_event(SDL_Event* e) {
+    if (!has_current_ || !e) return;
+
+    Notification& n = current_;
     if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT) {
         int x = e->button.x;
         int y = e->button.y;
 
-        SDL_Rect btn = n->close_button;
-        btn.x = n->rect.x + n->close_button.x;
-        btn.y = (int)(n->pos_y + n->close_button.y);
+        SDL_Rect btn = n.close_button;
+        btn.x = n.rect.x + n.close_button.x;
+        btn.y = (int)(n.pos_y + n.close_button.y);
 
         if (x >= btn.x && x <= btn.x + btn.w &&
             y >= btn.y && y <= btn.y + btn.h) {
-            n->disappearing = true;
+            n.disappearing = true;
         }
     }
 }
 
 
-void NotificationManager::draw_rounded_rect_surface(SDL_Surface* surface,
-                                                    int x, int y, int w, int h,
-                                                    SDL_Color color,
-                                                    int radius, bool filled)
-{
+void NotificationManager::draw_rounded_rect_surface(SDL_Surface* surface, int x, int y, int w, int h, SDL_Color color, int radius, bool filled) {
     if (!surface) return;
 
     // Fator de supersampling
@@ -195,7 +181,7 @@ void NotificationManager::draw_rounded_rect_surface(SDL_Surface* surface,
 
 
 // Desenha retângulo com alpha em SDL_Surface
-void NotificationManager::draw_rect_with_alpha(SDL_Surface* target, int x, int y, int w, int h, SDL_Color color) {
+void draw_rect_with_alpha(SDL_Surface* target, int x, int y, int w, int h, SDL_Color color) {
     if (!target) return;
 
     SDL_Surface* tmp = SDL_CreateRGBSurface(0, w, h, 32,
@@ -237,42 +223,50 @@ void NotificationManager::draw_notification(SDL_Surface* target, Notification* n
 
 
 
-void NotificationManager::draw_notification(SDL_Surface* target, Notification* n) {
-    if (!n || !target) return;
+void NotificationManager::draw_notification(SDL_Surface* target, const Notification& n) {
+    if (!target) return;
 
-    Uint8 a = (Uint8)n->alpha;
+    Uint8 a = static_cast<Uint8>(n.alpha);
     SDL_Color bg = {50, 50, 50, a};
-    draw_rounded_rect_surface(target, n->rect.x, (int)n->pos_y, n->rect.w, n->rect.h, bg, 10, true);
 
-    SDL_Rect btn = n->close_button;
-    btn.x = n->rect.x + n->close_button.x;
-    btn.y = (int)(n->pos_y + n->close_button.y);
+    // Fundo arredondado da notificação
+    draw_rounded_rect_surface(target,
+                              n.rect.x,
+                              static_cast<int>(n.pos_y),
+                              n.rect.w,
+                              n.rect.h,
+                              bg,
+                              10,
+                              true);
+
+    // Botão de fechar (calculado relativo ao rect)
+    SDL_Rect btn = n.close_button;
+    btn.x = n.rect.x + n.close_button.x;
+    btn.y = static_cast<int>(n.pos_y) + n.close_button.y;
+
     SDL_Color red = {200, 50, 50, a};
-    draw_rounded_rect_surface(target, btn.x, btn.y, btn.w, btn.h, red, 5, true);
+    draw_rounded_rect_surface(target, btn.x, btn.y, btn.w, btn.h, red, 8, true);
 
-    // --- Renderiza textos ---
-    SDL_Color text_color = { 255, 255, 255, a };
-    if (this->font_title_)
-        render_text(target, font_title_, n->title, n->rect.x + 10, (int)n->pos_y + 8, text_color);
+    SDL_Color text_color = {255, 255, 255, a};
 
-    if (this->font_message_)
-        render_text(target, font_message_, n->message, n->rect.x + 10, (int)n->pos_y + 30, text_color);
+    if (font_title_) {
+        Primitives::draw_text(target, font_title_, n.title, n.rect.x + 10, static_cast<int>(n.pos_y) + 8, text_color);
+    }
+
+    if (font_message_) {
+        Primitives::draw_text(target, font_message_, n.message, n.rect.x + 10, static_cast<int>(n.pos_y) + 30, text_color);
+    }
 }
-
-
-
 
 
 
 void NotificationManager::draw(SDL_Surface* target) {
-    if (!current_) return;
+    //if (!current_) return;
     draw_notification(target, current_);
 }
-
 
 
 void NotificationManager::set_fonts(TTF_Font* title, TTF_Font* message) {
     font_title_ = title;
     font_message_ = message;
 }
-
