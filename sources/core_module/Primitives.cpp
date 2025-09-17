@@ -419,9 +419,6 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
  * @param filled If true, the circle will be filled.
  */
 void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, Uint32 color, bool anti_aliasing, bool filled) {
-    if (!Utils::verify_limits(surface, cx + radius, cy + radius)) return;
-    if (!Utils::verify_limits(surface, cx - radius, cy - radius)) return;
-
     SDL_Color lineColor;
     SDL_GetRGBA(color, surface->format, &lineColor.r, &lineColor.g, &lineColor.b, &lineColor.a);
 

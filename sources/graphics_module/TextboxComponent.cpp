@@ -1,5 +1,8 @@
+// INCLUDES
 #include "TextboxComponent.h"
 
+
+// CONSTRUCTOR IMPLEMENTATION
 TextboxComponent::TextboxComponent(int x, int y, int w, int h, TTF_Font* font, bool onlyNumbers) {
     rect = {x, y, w, h};
     this->font = font;
@@ -11,6 +14,8 @@ TextboxComponent::TextboxComponent(int x, int y, int w, int h, TTF_Font* font, b
     active = false;
 }
 
+
+// METHOD IMPLEMENTATION
 void TextboxComponent::handleEvent(SDL_Event* e) {
     if (e->type == SDL_MOUSEBUTTONDOWN) {
         int mx = e->button.x;
@@ -47,6 +52,8 @@ void TextboxComponent::handleEvent(SDL_Event* e) {
     }
 }
 
+
+// METHOD IMPLEMENTATION
 void TextboxComponent::render(SDL_Surface* targetSurface) {
     if (!targetSurface) return;
 
@@ -118,4 +125,10 @@ void TextboxComponent::render(SDL_Surface* targetSurface) {
         Uint32 caretColor32 = SDL_MapRGB(targetSurface->format, 0, 0, 0);
         SDL_FillRect(targetSurface, &caret, caretColor32);
     }
+}
+
+
+// METHOD IMPLEMENTATION
+bool TextboxComponent::get_active() {
+    return this->active;
 }

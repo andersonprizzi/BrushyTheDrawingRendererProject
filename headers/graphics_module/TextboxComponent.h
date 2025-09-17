@@ -23,6 +23,7 @@ class TextboxComponent {
         void setText(const std::string& t) { text = t; }
         const std::string& getText() const { return text; }
         void setActive(bool a) { active = a; }
+        bool get_active();
 };
 
 #endif

@@ -1,30 +1,19 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// INCLUDES                                                                            //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// INCLUDES
 #include "App.h"
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// ATTRIBUTE INITIALIZATION                                                            //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// STATIC ATTRIBUTES INITIALIZATION
 float App::new_drawing_button_relative_x_percent = 0.50f;       // Posição horizontal relativa
 float App::new_drawing_button_relative_y_percent = 0.70f;       // Posição vertical relativa
 float App::load_file_button_relative_x_percent = 0.50f;         // Posição horizontal relativa
 int   App::default_button_height = 45;
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR DEFINITION                                                              //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// CONSTRUCTOR IMPLEMENTATION
 /**
  * @brief
- *      Implementation of the main application's constructor. Initializes
- *      the SDL library, creates the window, and retrieves the drawing surface.
+ * Implementation of the main application's constructor. Initializes
+ * the SDL library, creates the window, and retrieves the drawing surface.
 */
 App::App(const std::string& title, float width_percent, float height_percent) {
     this->window = nullptr;
@@ -34,6 +23,7 @@ App::App(const std::string& title, float width_percent, float height_percent) {
     this->window_height = 0;
     this->window_title = title;
     this->app_state = AppState::MENU_SCREEN;
+    this->notification_manager = nullptr;
 
     // Initialization of external libraries.
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -50,7 +40,7 @@ App::App(const std::string& title, float width_percent, float height_percent) {
     if (FontManager::load_fonts() == false) {
         ErrorHandler::fatal_error("Failed to load fonts.");
     } else {
-        ErrorHandler::loaded_fonts = true;
+        ErrorHandler::set_loaded_fonts(true);
     }
 
     // Getting the resolution of the primary monitor.
@@ -77,6 +67,10 @@ App::App(const std::string& title, float width_percent, float height_percent) {
 
     this->surface = SDL_GetWindowSurface(window);
 
+    // Initializing notification manager.
+    this->notification_manager = new NotificationManager(this->window_width, this->window_height);
+    this->notification_manager->set_fonts(FontManager::roboto_semibold_20, FontManager::roboto_semibold_20);
+
     // Initializing app icon.
     SDL_Surface* icon = SDL_LoadBMP("assets/Icon_64.bmp");
 
@@ -89,50 +83,22 @@ App::App(const std::string& title, float width_percent, float height_percent) {
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// DESTRUCTOR DEFINITION                                                               //
-/////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief
- *      Implementation of the main application destructor.
- */
-App::~App() {
-    this->exit_app();
-}
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
-void App::exit_app() {
-    SDL_DestroyWindow(this->window);
-
-    if (ErrorHandler::loaded_fonts) {
-        FontManager::close_fonts();
-    }
-
-    TTF_Quit();
-    SDL_Quit();
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- *
- */
+// METHOD IMPLEMENTATION
 void App::run() {
     this->running = true;
 
-    AppBar appBar(this->window_width, 50, "Creating a new project", FontManager::roboto_semibold_20);
-    appBar.setBackgroundColor({255, 255, 255, 255});
-    appBar.setTextColor({0, 0, 0, 255});
+    Notification n;
+    n.title = "Warning!";
+    n.message = "Message from GOD.";
+    n.rect = { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 };
+    n.close_button = { n.rect.w - 28, 8, 20, 20 };
+    n.duration_ms = 6000;
+
+    this->notification_manager->push(n);
+
+    AppBar app_bar(this->window_width, 50, "Creating a new project", FontManager::roboto_semibold_20);
+    app_bar.setBackgroundColor({255, 255, 255, 255});
+    app_bar.setTextColor({0, 0, 0, 255});
 
     // Initializing screen components.
     int btn_w = 300;
@@ -156,7 +122,7 @@ void App::run() {
         textRect.y = icon_y + icon_h + 10;
     }
 
-    myImageComponent = new ImageComponent(
+    this->app_icon_image = new ImageComponent(
         "assets/Icon_256.bmp",
         icon_x,
         icon_y
@@ -218,7 +184,6 @@ void App::run() {
         true
     );
 
-    SDL_StartTextInput(); // necessário para capturar SDL_TEXTINPUT
 
     // Execution loop.
     while (running) {
@@ -226,16 +191,25 @@ void App::run() {
             clear_screen(255, 255, 255);
             new_drawing_button->draw(surface);
             load_project_button->draw(surface);
-            myImageComponent->draw(surface);
+            app_icon_image->draw(surface);
 
             if (textSurface) {
                 SDL_BlitSurface(textSurface, NULL, surface, &textRect);
             }
 
         } else if (this->app_state == AppState::NEW_PROJECT_SCREEN) {
-            clear_screen(240, 240, 240);
+            // Enables text input only if any textbox is active.
+            if ((width_textbox && width_textbox->get_active()) || (height_textbox && height_textbox->get_active())) {
+                SDL_StartTextInput();
+            } else {
+                SDL_StopTextInput();
+            }
 
-            appBar.draw(surface);
+            // Clears the screen with the default background color.
+            clear_screen(Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_window"));
+
+            // Draw the app bar.
+            app_bar.draw(this->surface);
 
             if (text_enter_width && text_enter_height) {
                 textRect.w = text_enter_width->w;
@@ -307,10 +281,20 @@ void App::run() {
             aa_filled_circ.draw(surface, true, true);
             */
         }
+
+        this->notification_manager->update();
+        this->notification_manager->draw(this->surface);
+
         this->handle_events();
         this->update_screen();
     }
 
+    this->close();
+}
+
+
+// METHOD IMPLEMENTATION
+void App::close(int exit_code) {
     if (textSurface) SDL_FreeSurface(textSurface);
 
     if (width_textbox) {
@@ -319,29 +303,38 @@ void App::run() {
     }
 
     SDL_StopTextInput();
+
+    SDL_DestroyWindow(this->window);
+
+    if (ErrorHandler::get_loaded_fonts() == true) {
+        FontManager::close_fonts();
+    }
+
+    TTF_Quit();
+    SDL_Quit();
+    exit(exit_code);
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 void App::handle_events() {
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
 
+    while (SDL_PollEvent(&event)) {
+        // Processes the program exit event.
+        if (event.type == SDL_QUIT) {
+            /*
+            SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
             if (SDL_SaveBMP(screenSurface, "screenshot.bmp") == 0) {
                 printf("Tela salva como screenshot.bmp\n");
             } else {
                 printf("Erro ao salvar BMP: %s\n", SDL_GetError());
             }
-
+            */
             running = false;
         }
 
+        // Processes window resizing.
         if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
             surface = SDL_GetWindowSurface(window);
             this->window_width = surface->w;
@@ -358,19 +351,41 @@ void App::handle_events() {
             );
         }
 
+        // Processes mouse click events.
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             int mx = event.button.x;
             int my = event.button.y;
 
+            // Screen change: MENU_SCREEN > NEW_PROJECT_SCREEN
             if (this->app_state == AppState::MENU_SCREEN && new_drawing_button->is_clicked(mx, my)) {
                 this->app_state = AppState::NEW_PROJECT_SCREEN;
 
+            // Screen change: NEW_PROJECT_SCREEN > RENDERING_SCREEN
             } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && create_project_button->is_clicked(mx, my)) {
-                SDL_SetWindowSize(this->window, std::stoi(width_textbox->getText()), std::stoi(height_textbox->getText()));
-                SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-                this->app_state = AppState::RENDERING_SCREEN;
+                if (width_textbox->getText().empty()) {
+                    printf("Textbox vazia!\n");
+                    // TODO: Handle error.
+                    continue;
+                }
+
+                if (height_textbox->getText().empty()) {
+                    printf("Textbox vazia!\n");
+                    // TODO: Handle error.
+                    continue;
+                }
+
+                if (Utils::check_window_size(this, std::stoi(width_textbox->getText()), std::stoi(height_textbox->getText()))) {
+                    SDL_SetWindowSize(this->window, std::stoi(width_textbox->getText()), std::stoi(height_textbox->getText()));
+                    SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+                    this->app_state = AppState::RENDERING_SCREEN;
+                } else {
+                    // Tamanho inválido. Muito pequeno.
+                    // TODO: Handle error.
+                }
             }
         }
+
+        this->notification_manager->handle_event(&event);
 
         if (width_textbox) {
             width_textbox->handleEvent(&event);
@@ -383,72 +398,52 @@ void App::handle_events() {
 }
 
 
+// METHOD IMPLEMENTATION
+void App::clear_screen(Uint32 color) {
+    if (!surface) return;
+    SDL_FillRect(surface, nullptr, color);
+}
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
 
+// METHOD IMPLEMENTATION
 void App::clear_screen(Uint8 r, Uint8 g, Uint8 b) {
+    if (!surface) return;
     Uint32 color = SDL_MapRGB(surface->format, r, g, b);
     SDL_FillRect(surface, NULL, color);
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 void App::update_screen() {
     SDL_UpdateWindowSurface(window);
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 SDL_Surface* App::get_surface() {
     return this->surface;
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 int App::get_window_width() {
     return this->window_width;
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 int App::get_window_height() {
     return this->window_height;
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 int App::get_screen_width() {
     return this->screen_width;
 }
 
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// METHOD DEFINITION                                                                   //
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// METHOD IMPLEMENTATION
 int App::get_screen_height() {
     return this->screen_height;
 }

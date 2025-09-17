@@ -9,6 +9,9 @@ This project started as an academic initiative by the authors during their Compu
 ## Release notes
 This section documents all major updates, improvements, and newly added features.
 
+### Release 0.1.3
+- Added the initial version of the notification system.
+
 ### Release 0.1.0
 - Added the home screen.
 - Added the new project creation screen.

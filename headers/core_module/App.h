@@ -3,13 +3,20 @@
 
 #define SDL_MAIN_HANDLED
 
+// Forward declaration.
+class App;
+class ButtonComponent;
+class TextboxComponent;
+class NotificationManager;
+
 // C++ standard library.
 #include <string>
 #include <iostream>
 #include <cmath>
 #include <stack>
+#include <queue>
 #include <unordered_map>
-//#include <filesystem>
+#include <algorithm>
 
 // C standard library.
 #include <cstdio>
@@ -21,10 +28,11 @@
 #include <SDL_ttf.h>
 
 // Header files.
-#include "ErrorHandler.h"
-#include "FontManager.h"
 #include "Colors.h"
 #include "Utils.h"
+#include "ErrorHandler.h"
+#include "FontManager.h"
+#include "NotificationManager.h"
 #include "Point.h"
 #include "Primitives.h"
 #include "ButtonComponent.h"
@@ -33,9 +41,6 @@
 #include "AppBarComponent.h"
 #include "Shape.h"
 #include "Circle.h"
-
-class ButtonComponent;
-class TextboxComponent;
 
 enum class AppState {
     MENU_SCREEN,
@@ -61,23 +66,25 @@ class App {
         static float new_drawing_button_relative_y_percent;
         static float load_file_button_relative_x_percent;
         static int default_button_height;
-        ImageComponent* myImageComponent;
+        ImageComponent* app_icon_image;
         ButtonComponent* new_drawing_button;
         ButtonComponent* load_project_button;
         ButtonComponent* create_project_button;
         TextboxComponent* width_textbox;
         TextboxComponent* height_textbox;
+
         SDL_Surface* textSurface;
         SDL_Surface* text_enter_height;
         SDL_Surface* text_enter_width;
         SDL_Rect textRect;
+        NotificationManager *notification_manager;
 
     public:
         App(const std::string& title, float width_percent, float height_percent);
-        ~App();
         void run();
-        void exit_app();
+        void close(int exit_code = 1);
         void handle_events();
+        void clear_screen(Uint32 color);
         void clear_screen(Uint8 r, Uint8 g, Uint8 b);
         void update_screen();
         int get_window_width();

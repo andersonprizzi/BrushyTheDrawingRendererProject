@@ -14,7 +14,7 @@ ButtonComponent::ButtonComponent(int x, int y, int w, int h, Uint32 color, const
 void ButtonComponent::draw(SDL_Surface* surface) {
     if (!surface) return;
 
-    int radius = 8; // Rounded corner radius
+    int radius = 6; // Rounded corner radius
 
     // Draw central areas
     SDL_Rect rect = { x + radius, y, w - 2*radius, h };
