@@ -266,7 +266,6 @@ void App::run() {
             back_menu_button->draw(surface);
 
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
-            /*
             // Limpa a janela com cinza, se quiser bordas, ou com branco se quiser uniforme
             SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 240, 240, 240));
 
@@ -283,8 +282,8 @@ void App::run() {
 
             SDL_BlitSurface(drawing_surface, nullptr, surface, &dst_rect);
             SDL_UpdateWindowSurface(window);
-            */
 
+            /*
             clear_screen(255, 255, 255);
 
             // Test colors - Remove at the end.
@@ -312,7 +311,7 @@ void App::run() {
             polygon_2->add_point(Point(200, 200));
             polygon_2->add_point(Point(100, 200));
             polygon_2->draw(this->surface);
-
+            */
         }
 
         this->notification_manager->update();
