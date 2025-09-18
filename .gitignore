@@ -5,13 +5,8 @@
 *.autosave
 
 # Compiled and objects
-*.o
-*.obj
 *.exe
 *.so
-*.dylib
-*.a
-*.lib
 *.out
 
 # Common build folders
