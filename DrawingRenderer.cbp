@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-std=c++17" />
 					<Add directory="external/include/SDL2" />
 					<Add directory="external/include/SDL2_TTF" />
 				</Compiler>
@@ -49,6 +50,7 @@
 		<Unit filename="headers/core_module/App.h" />
 		<Unit filename="headers/core_module/Colors.h" />
 		<Unit filename="headers/core_module/ErrorHandler.h" />
+		<Unit filename="headers/core_module/FileManager.h" />
 		<Unit filename="headers/core_module/FontManager.h" />
 		<Unit filename="headers/core_module/Notification.h" />
 		<Unit filename="headers/core_module/NotificationManager.h" />
@@ -65,6 +67,7 @@
 		<Unit filename="sources/core_module/App.cpp" />
 		<Unit filename="sources/core_module/Colors.cpp" />
 		<Unit filename="sources/core_module/ErrorHandler.cpp" />
+		<Unit filename="sources/core_module/FileManager.cpp" />
 		<Unit filename="sources/core_module/FontManager.cpp" />
 		<Unit filename="sources/core_module/Main.cpp" />
 		<Unit filename="sources/core_module/Notification.cpp" />

@@ -11,6 +11,7 @@
         "**/templates/**/*.html": "django-html",
         "**/base_templates/**/*.html": "django-html",
         "**/requirements{/**,*}.{txt,in}": "pip-requirements",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "cstdio": "cpp"
     }
 }

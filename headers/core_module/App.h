@@ -55,6 +55,7 @@ class App {
         // Application attributes.
         SDL_Window* window;
         SDL_Surface* surface;
+        SDL_Surface* drawing_surface;
         bool running;
         int screen_width;
         int screen_height;

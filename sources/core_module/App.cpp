@@ -1,4 +1,3 @@
-// INCLUDES
 #include "App.h"
 
 
@@ -18,11 +17,13 @@ int   App::default_button_height = 45;
 App::App(const std::string& title, float width_percent, float height_percent) {
     this->window = nullptr;
     this->surface = nullptr;
+    this->drawing_surface = nullptr;
     this->running = false;
     this->window_width = 0;
     this->window_height = 0;
     this->window_title = title;
-    this->app_state = AppState::MENU_SCREEN;
+    //this->app_state = AppState::MENU_SCREEN;
+    this->app_state = AppState::RENDERING_SCREEN; // REMOVER DEPOIS.
     this->notification_manager = nullptr;
 
     // Initialization of external libraries.
@@ -66,6 +67,9 @@ App::App(const std::string& title, float width_percent, float height_percent) {
     }
 
     this->surface = SDL_GetWindowSurface(window);
+    this->drawing_surface = SDL_CreateRGBSurface(0, window_width, window_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000);
+    // Preencher o fundo branco uma vez
+    SDL_FillRect(drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
 
     // Initializing notification manager.
     this->notification_manager = new NotificationManager(this->window_width, this->window_height);
@@ -80,6 +84,13 @@ App::App(const std::string& title, float width_percent, float height_percent) {
         SDL_SetWindowIcon(this->window, icon);
         SDL_FreeSurface(icon);
     }
+
+
+
+
+    // REMOVER DEPOIS.
+    SDL_SetWindowSize(this->window, 1200, 600);
+    SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 
@@ -189,6 +200,16 @@ void App::run() {
         true
     );
 
+    Uint32 red = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "red");
+    Uint32 green = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "green");
+    Uint32 blue = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "blue");
+    Uint32 black = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
+
+    Polygon *polygon_1 = new Polygon(true, false, green);
+    polygon_1->add_point(Point(350, 400));
+    polygon_1->add_point(Point(260, 300));
+    polygon_1->add_point(Point(268, 250));
+
 
     // Execution loop.
     while (running) {
@@ -245,6 +266,25 @@ void App::run() {
             back_menu_button->draw(surface);
 
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
+            /*
+            // Limpa a janela com cinza, se quiser bordas, ou com branco se quiser uniforme
+            SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 240, 240, 240));
+
+            // Limpa o canvas de desenho com fundo branco
+            SDL_FillRect(drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
+
+            polygon_1->draw(drawing_surface);
+
+            SDL_Rect dst_rect;
+            dst_rect.w = drawing_surface->w;
+            dst_rect.h = drawing_surface->h;
+            dst_rect.x = (window_width - dst_rect.w) / 2;
+            dst_rect.y = (window_height - dst_rect.h) / 2;
+
+            SDL_BlitSurface(drawing_surface, nullptr, surface, &dst_rect);
+            SDL_UpdateWindowSurface(window);
+            */
+
             clear_screen(255, 255, 255);
 
             // Test colors - Remove at the end.
@@ -266,12 +306,6 @@ void App::run() {
             //Primitives::draw_ellipse(this->surface, 750, 300, 150, 50, black, true, true);
             //Primitives::draw_ellipse(this->surface, 1050, 300, 100, 150, blue, true, false);
 
-            Polygon *polygon_1 = new Polygon(true, false, green);
-            polygon_1->add_point(Point(350, 400));
-            polygon_1->add_point(Point(260, 300));
-            polygon_1->add_point(Point(268, 250));
-            polygon_1->draw(this->surface);
-
             Polygon *polygon_2 = new Polygon(false, true, green, green, Point(110, 120));
             polygon_2->add_point(Point(100, 100));
             polygon_2->add_point(Point(200, 100));
@@ -279,27 +313,6 @@ void App::run() {
             polygon_2->add_point(Point(100, 200));
             polygon_2->draw(this->surface);
 
-            /*
-            Rectangle rect(50, 50, 200, 150, red);
-            rect.draw(surface, true);
-
-            Rectangle rect2(50, 170, 200, 250, red);
-            rect2.draw(surface, true, true);
-
-            Circle circ(300, 300, 100, black);
-            circ.draw(surface, false);
-
-            //CircleFilled circf(300, 300, 70, green);
-            //circf.draw(surface);
-            Circle filled_circ(300, 300, 70, green);
-            filled_circ.draw(surface, true);
-
-            //CircleFilledAA circfa(500, 100, 70, blue);
-            //circfa.draw(surface, true);
-
-            Circle aa_filled_circ(500, 100, 70, blue);
-            aa_filled_circ.draw(surface, true, true);
-            */
         }
 
         this->notification_manager->update();
