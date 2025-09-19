@@ -18,14 +18,36 @@
  *      Uint32 value representing the color to set (in the surface's pixel format).
  **/
 void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
-    if (!surface) return;
-    if (Utils::verify_limits(surface, x, y) == 0) return;
+    if (!surface) {
+            printf("MORRA SURFACE\n");
+            return;
+    }
+    if (Utils::verify_limits(surface, x, y) == 0){
+        printf("OUT OF BOUNDS\n");
+        return;
+    }
 
     Uint32* pixels = (Uint32*)surface->pixels;
     int pitch = surface->pitch / 4;
     pixels[y * pitch + x] = color;
 }
 
+void Primitives::set_pixel_log(SDL_Surface* surface, int x, int y, Uint32 color) {
+    if (!surface) {
+            printf("MORRA SURFACE\n");
+            return;
+    }
+    if (Utils::verify_limits(surface, x, y) == 0){
+        printf("OUT OF BOUNDS\n");
+        return;
+    }
+
+    Uint32* pixels = (Uint32*)surface->pixels;
+    int pitch = surface->pitch / 4;
+    //Uint32 mapped_color = SDL_MapRGB(surface->format, 0, 0, 0);  // preto
+    pixels[y * pitch + x] = color;
+    printf("PITNADO");
+}
 
 // METHOD IMPLEMENTATION
 /**
@@ -445,6 +467,63 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
     }
 }
 
+void Primitives::fill_polygon(SDL_Surface* s, const std::vector<SDL_Point>& pts, Uint32 color) {
+    if (!s || pts.size() < 3) return;
+    const int H = s->h, W = s->w;
+
+    // encontra faixa de Y
+    int ymin = pts[0].y, ymax = pts[0].y;
+    for (auto &p : pts){ ymin = std::min(ymin, p.y); ymax = std::max(ymax, p.y); }
+    ymin = std::max(0, ymin);
+    ymax = std::min(H - 1, ymax);
+
+    struct Edge { int y_min, y_max; double x_at_ymin, inv_slope; };
+    std::vector<Edge> edges; edges.reserve(pts.size());
+
+    // constrói tabela de arestas (ignora horizontais)
+    for (size_t i = 0; i < pts.size(); ++i) {
+        SDL_Point a = pts[i], b = pts[(i + 1) % pts.size()];
+        if (a.y == b.y) continue;
+        if (a.y > b.y) std::swap(a, b); // a.y < b.y
+        Edge e;
+        e.y_min = a.y;
+        e.y_max = b.y;            // tratado como [y_min, y_max) (topo incluso, base exclusiva)
+        e.x_at_ymin = a.x;
+        e.inv_slope = double(b.x - a.x) / double(b.y - a.y);
+        edges.push_back(e);
+    }
+
+    // para cada scanline
+    for (int y = ymin; y <= ymax; ++y) {
+        std::vector<double> xs; xs.reserve(pts.size());
+
+        // coleta interseções com esta linha (y + 0.5 evita ambiguidade em vértices)
+        double scan_y = y + 0.5;
+        for (const auto& e : edges) {
+            if (scan_y >= e.y_min && scan_y < e.y_max) {
+                double x = e.x_at_ymin + (scan_y - e.y_min) * e.inv_slope;
+                xs.push_back(x);
+            }
+        }
+
+        if (xs.size() < 2) continue;
+        std::sort(xs.begin(), xs.end());
+
+        // pinta pares (regra par-ímpar)
+        for (size_t i = 0; i + 1 < xs.size(); i += 2) {
+            int xL = (int)std::ceil(xs[i]);
+            int xR = (int)std::floor(xs[i + 1]);
+            if (xL > xR) continue;
+            xL = std::max(0, xL);
+            xR = std::min(W - 1, xR);
+            for (int x = xL; x <= xR; ++x) {
+                Primitives::set_pixel(s, x, y, color);
+            }
+        }
+    }
+}
+
+
 
 // METHOD IMPLEMENTATION
 /**
@@ -688,5 +767,55 @@ void Primitives::flood_fill(SDL_Surface* surface, int x, int y, Uint32 fill_colo
             stack_y[stack_top] = py - 1;
             stack_top++;
         }
+    }
+}
+
+void Primitives::flood_fill_log(SDL_Surface* surface, int x, int y, Uint32 fill_color) {
+    if (!surface) return;
+
+    Uint32 targetColor = get_pixel(surface, x, y);
+    if (targetColor == fill_color) return;
+
+    // Buffer para a pilha (simples, tamanho fixo)
+    const int MAX_STACK = 100000;
+    int stack_x[MAX_STACK];
+    int stack_y[MAX_STACK];
+    int stack_top = 0;
+
+    // Push inicial
+    stack_x[stack_top] = x;
+    stack_y[stack_top] = y;
+    stack_top++;
+
+    while (stack_top > 0) {
+        // Pop
+        stack_top--;
+        int px = stack_x[stack_top];
+        int py = stack_y[stack_top];
+
+        // Limites da surface
+        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h) continue;
+        if (get_pixel(surface, px, py) != targetColor) continue;
+
+        // Pinta pixel
+        set_pixel(surface, px, py, fill_color);
+
+        // Push vizinhos
+        if (stack_top + 4 < MAX_STACK) {
+            stack_x[stack_top] = px + 1;
+            stack_y[stack_top] = py;
+            stack_top++;
+            stack_x[stack_top] = px - 1;
+            stack_y[stack_top] = py;
+            stack_top++;
+            stack_x[stack_top] = px;
+            stack_y[stack_top] = py + 1;
+            stack_top++;
+            stack_x[stack_top] = px;
+            stack_y[stack_top] = py - 1;
+            stack_top++;
+        }
+
+        printf("FEEL THE FLOOD");
     }
 }

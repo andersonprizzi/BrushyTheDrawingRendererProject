@@ -53,3 +53,48 @@ bool Utils::check_window_size(App *app, int width, int height) {
 
     return true;
 }
+
+
+double Utils::to_radians(double degrees)
+{
+    return degrees * 0.017453293;
+}
+
+int Utils::clampi(int v, int lo, int hi) {
+    return v < lo ? lo : (v > hi ? hi : v);
+}
+
+// janela (screen) -> canvas (desconta o dst_rect do blit)
+Point Utils::screen_to_canvas(int mx, int my, const Utils::UniverseRect& dst_rect) {
+    return { mx - dst_rect.x, my - dst_rect.y };
+}
+
+// canvas -> universo  (Y do universo cresce pra cima)
+Point Utils::canvas_to_universe(Point c,int canvas_w, int canvas_h,int universe_w, int universe_h) {
+    const double sx = double(universe_w) / double(canvas_w);
+    const double sy = double(universe_h) / double(canvas_h);
+    return { double(c.get_x()) * sx, double(canvas_h - c.get_y()) * sy }; //Y invertido
+}
+
+// universo -> canvas (meia-aberta + clamp pra evitar x==w / y==h)
+Point Utils::universe_to_canvas(Point u,int canvas_w, int canvas_h,int universe_w, int universe_h) {
+    int x = int(std::floor(u.get_x() * double(canvas_w) / double(universe_w)));
+    int y_from_bottom = int(std::floor(u.get_y() * double(canvas_h) / double(universe_h)));
+    int y = (canvas_h - 1) - y_from_bottom;
+    x = clampi(x, 0, canvas_w - 1);
+    y = clampi(y, 0, canvas_h - 1);
+    Point p = Point(x,y);
+    return p;
+}
+
+// dois pontos no canvas (drag) -> retângulo normalizado no universo
+Utils::UniverseRect Utils::canvas_drag_to_universe(Point a, Point b, int canvas_w, int canvas_h,int universe_w, int universe_h) {
+    Point ua = canvas_to_universe(a, canvas_w, canvas_h, universe_w, universe_h);
+    Point ub = canvas_to_universe(b, canvas_w, canvas_h, universe_w, universe_h);
+    Utils::UniverseRect r;
+    r.x = std::min(ua.get_x(), ub.get_x());
+    r.y = std::min(ua.get_y(), ub.get_y());
+    r.w = std::fabs(ub.get_x() - ua.get_x());
+    r.h = std::fabs(ub.get_y() - ua.get_y());
+    return r;
+}

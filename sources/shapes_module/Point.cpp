@@ -3,32 +3,32 @@
 
 
 // CONSTRUCTOR IMPLEMENTATION
-Point::Point(int new_x = 0, int new_y = 0) {
+Point::Point(double new_x = 0, double new_y = 0) {
     x = new_x;
     y = new_y;
 }
 
 
 // METHOD IMPLEMENTATION
-int Point::get_x() {
+double Point::get_x() {
     return x;
 };
 
 
 // METHOD IMPLEMENTATION
-int Point::get_y() {
+double Point::get_y() {
     return y;
 }
 
 
 // METHOD IMPLEMENTATION
-void Point::set_x(int new_x){
+void Point::set_x(double new_x){
     x = new_x;
 }
 
 
 // METHOD IMPLEMENTATION
-void Point::set_y(int new_y) {
+void Point::set_y(double new_y) {
     y = new_y;
 }
 

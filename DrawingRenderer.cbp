@@ -14,16 +14,14 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-std=c++17" />
-					<Add directory="external/include/SDL2" />
-					<Add directory="external/include/SDL2_TTF" />
+					<Add directory="includes" />
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32" />
 					<Add option="-lSDL2main" />
 					<Add option="-lSDL2" />
 					<Add option="-lSDL2_ttf" />
-					<Add directory="external/lib/SDL2" />
-					<Add directory="external/lib/SDL2_TTF" />
+					<Add directory="lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -61,6 +59,7 @@
 		<Unit filename="headers/graphics_module/ImageComponent.h" />
 		<Unit filename="headers/graphics_module/TextboxComponent.h" />
 		<Unit filename="headers/shapes_module/Circle.h" />
+		<Unit filename="headers/shapes_module/House.h" />
 		<Unit filename="headers/shapes_module/Point.h" />
 		<Unit filename="headers/shapes_module/Polygon.h" />
 		<Unit filename="headers/shapes_module/Shape.h" />

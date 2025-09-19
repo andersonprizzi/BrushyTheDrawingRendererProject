@@ -1,7 +1,6 @@
 #include "Polygon.h"
 #include "Point.h"
 
-
 Polygon::Polygon(bool anti_aliasing, bool filled, Uint32 border_color, Uint32 fill_color, Point fill_point) : fill_point(fill_point) {
     points.clear();
     this->anti_aliasing = anti_aliasing;

@@ -17,6 +17,7 @@ class NotificationManager;
 #include <stack>
 #include <queue>
 #include <algorithm>
+#include <list>
 
 // C standard library.
 #include <cstdio>
@@ -27,6 +28,7 @@ class NotificationManager;
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+class House;
 // Header files.
 #include "Colors.h"
 #include "Utils.h"
@@ -43,11 +45,19 @@ class NotificationManager;
 #include "Shape.h"
 #include "Circle.h"
 #include "Polygon.h"
+#include "House.h"
 
 enum class AppState {
     MENU_SCREEN,
     NEW_PROJECT_SCREEN,
     RENDERING_SCREEN
+};
+
+enum class MouseState {
+    NORMAL_MODE,
+    PENCIL_MODE,
+    BUCKET_MODE,
+    HOUSE_MODE
 };
 
 class App {
@@ -61,8 +71,10 @@ class App {
         int screen_height;
         int window_width;
         int window_height;
+
         std::string window_title;
         AppState app_state;
+        MouseState mouse_state = MouseState::NORMAL_MODE;
         NotificationManager *notification_manager;
 
         // Graphical interface attributes.
@@ -82,8 +94,28 @@ class App {
         SDL_Surface* text_enter_width_surface;
         SDL_Rect text_rect;
 
+        //======================================
+        //PARADAS PARA GUI DO PAINT 2
+        std::list<Point> points;
+        std::list<Point> fill_points;
+        std::list<House> dynamic_houses;
+        //PARA DRAG AND DROP
+        bool mouse_down = false; //Informa se o mouse foi baixado dentro da área de desenho (se desenho foi iniciado, basicamente)
+        bool temporary_in_list = false;
+        Point temporary_dragging_point = Point(0,0);
+        Point initial_point = Point(0,0);
+        //BOTÕES
+        ButtonComponent* pencil_button;
+        ButtonComponent* bucket_button;
+        ButtonComponent* house_button;
+
+        Uint32 primary_colors[4]; //Pensei pra colocar tuas cores e tal, mas daí tu se vira pra implementar kkk boa sorte
+        //======================================
+
     public:
         App(const std::string& title, float width_percent, float height_percent);
+        static int universe_width;
+        static int universe_height;
         void run();
         void close(int exit_code = 1);
         void handle_events();
@@ -92,6 +124,8 @@ class App {
         void update_screen();
         int get_window_width();
         int get_window_height();
+        /*static int get_universe_width();
+        static int get_universe_height();*/
         int get_screen_width();
         int get_screen_height();
         SDL_Surface* get_surface();
