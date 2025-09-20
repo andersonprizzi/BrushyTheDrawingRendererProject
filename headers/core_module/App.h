@@ -18,6 +18,8 @@ class NotificationManager;
 #include <queue>
 #include <algorithm>
 #include <list>
+#include <vector>
+#include <memory>
 
 // C standard library.
 #include <cstdio>
@@ -29,6 +31,8 @@ class NotificationManager;
 #include <SDL_ttf.h>
 
 class House;
+class Tree;
+class Shape;
 // Header files.
 #include "Colors.h"
 #include "Utils.h"
@@ -46,7 +50,7 @@ class House;
 #include "Circle.h"
 #include "Polygon.h"
 #include "House.h"
-
+#include "Tree.h"
 enum class AppState {
     MENU_SCREEN,
     NEW_PROJECT_SCREEN,
@@ -57,7 +61,8 @@ enum class MouseState {
     NORMAL_MODE,
     PENCIL_MODE,
     BUCKET_MODE,
-    HOUSE_MODE
+    HOUSE_MODE,
+    TREE_MODE
 };
 
 class App {
@@ -99,6 +104,10 @@ class App {
         std::list<Point> points;
         std::list<Point> fill_points;
         std::list<House> dynamic_houses;
+        std::list<Tree> dynamic_trees;
+
+        std::vector<std::unique_ptr<Shape> > shapes;
+
         //PARA DRAG AND DROP
         bool mouse_down = false; //Informa se o mouse foi baixado dentro da área de desenho (se desenho foi iniciado, basicamente)
         bool temporary_in_list = false;
@@ -108,6 +117,7 @@ class App {
         ButtonComponent* pencil_button;
         ButtonComponent* bucket_button;
         ButtonComponent* house_button;
+        ButtonComponent* tree_button;
 
         Uint32 primary_colors[4]; //Pensei pra colocar tuas cores e tal, mas daí tu se vira pra implementar kkk boa sorte
         //======================================

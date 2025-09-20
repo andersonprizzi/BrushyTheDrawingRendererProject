@@ -39,22 +39,6 @@ void House::generate_points() {
     this->roof_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.65  * this->height);
 }
 
-static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
-
-static inline int map_x(double universe_x, int device_width, int universe_width) {
-    // [0, UW] -> [0, W-1], usando floor
-    int x = (int)std::floor(universe_x * (double)device_width / (double)universe_width);
-    return clampi(x, 0, device_width - 1);
-}
-
-static inline int map_y(double universe_y, int device_height, int universe_height) {
-    // eixo Y do "universo" cresce para cima; pixel (0,0) é topo
-    // [0, UH] (bottom->top) -> [H-1, 0]
-    int y_from_bottom = (int)std::floor(universe_y * (double)device_height / (double)universe_height);
-    int y = (device_height - 1) - y_from_bottom;
-    return clampi(y, 0, device_height - 1);
-}
-
 void House::rotate_figure(double angle)
 {
     double x, y, radians, cosTheta, sinTheta, dx, dy;
@@ -122,6 +106,9 @@ void House::scale(double sx, double sy){
     }
 
     this->translate(dx,dy);
+
+    this->width  = (int)lround(this->width  * sx);
+    this->height = (int)lround(this->height * sy);
 }
 
 void House::change_height(double new_height){

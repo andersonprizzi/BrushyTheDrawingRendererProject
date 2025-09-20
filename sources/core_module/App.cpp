@@ -220,6 +220,17 @@ void App::run() {
         Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
+    this->tree_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.28),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(btn_w/4),
+        static_cast<int>(this->default_button_height / 1.5),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Tree",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
 
     // Creating textbox components.
     width_textbox = new TextboxComponent(
@@ -312,20 +323,28 @@ void App::run() {
             SDL_FillRect(drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
 
             polygon_1->draw(drawing_surface);
-            House casinha = House(30,20,50,35,red,blue,green);
-            casinha.draw(drawing_surface);
 
-            casinha.change_origin(Point(50, 10));
+            //Primitives::draw_ellipse(drawing_surface, 200, 200, 100, 50, black, true, true);
+
+            Tree arvre = Tree(20, 20, 50, 35, black, green, red);
+            //arvre.rotate_figure(65);
+            arvre.scale(2, 1);
+            arvre.draw(drawing_surface);
+
+            //House casinha = House(30,20,50,35,red,blue,green);
+            //casinha.draw(drawing_surface);
+
+            //casinha.change_origin(Point(50, 10));
 
             //casinha.translate(-10.0, 10.0);
             //Point centro = Point(casinha.x_origin + 0.5 * casinha.width,casinha.y_origin + 0.5 * casinha.height);
             //casinha.rotate_figure(drawing_surface, 45.0, centro);
-            casinha.rotate_figure(45.0);
-            casinha.draw(drawing_surface);
+            //casinha.rotate_figure(45.0);
+            //casinha.draw(drawing_surface);
 
-            casinha.rotate_figure(45.0);
-            casinha.scale(1.7, 0.5);
-            casinha.draw(drawing_surface);
+            //casinha.rotate_figure(45.0);
+            //casinha.scale(1.7, 0.5);
+            //casinha.draw(drawing_surface);
 
             //Imprime pontos gerados pelo
             for (Point p : this->points) {
@@ -345,6 +364,15 @@ void App::run() {
                 casa.draw(drawing_surface);
             }
 
+            for (Tree arvore : this->dynamic_trees) {
+                //printf("(%f, %f)\n", p.get_x(), p.get_y());
+                arvore.draw(drawing_surface);
+            }
+
+            for (size_t i = 0; i < shapes.size(); ++i) {
+                shapes[i]->draw(drawing_surface);
+            }
+
             SDL_Rect dst_rect;
             dst_rect.w = drawing_surface->w;
             dst_rect.h = drawing_surface->h;
@@ -357,6 +385,7 @@ void App::run() {
             this->pencil_button->draw(surface);
             this->bucket_button->draw(surface);
             this->house_button->draw(surface);
+            this->tree_button->draw(surface);
 
             //printf("%d", this->mouse_state);
             //SDL_UpdateWindowSurface(window);
@@ -519,24 +548,33 @@ void App::handle_events() {
             // Screen change: NEW_PROJECT_SCREEN > MENU_SCREEN
             } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && back_menu_button->is_clicked(mx, my)) {
                 this->app_state = AppState::MENU_SCREEN;
-            } else if (this->app_state == AppState::RENDERING_SCREEN && pencil_button->is_clicked(mx, my)) {
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->pencil_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::PENCIL_MODE;
                 this->notification_manager->push({
                         "Pencil mode",
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
-            } else if (this->app_state == AppState::RENDERING_SCREEN && bucket_button->is_clicked(mx, my)) {
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->bucket_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::BUCKET_MODE;
                 this->notification_manager->push({
                         "Bucket mode",
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
-            } else if (this->app_state == AppState::RENDERING_SCREEN && house_button->is_clicked(mx, my)) {
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->house_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::HOUSE_MODE;
                 this->notification_manager->push({
                         "House mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->mouse_down = false;
+                this->temporary_in_list = false;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->tree_button->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::TREE_MODE;
+                this->notification_manager->push({
+                        "Tree mode",
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
@@ -554,7 +592,7 @@ void App::handle_events() {
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
                     fill_points.emplace_back(cx, cy);
-                } else if (this->mouse_state == MouseState::HOUSE_MODE) {
+                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE) {
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
@@ -576,102 +614,63 @@ void App::handle_events() {
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
                     points.emplace_back(cx, cy);
-                } else if (this->mouse_state == MouseState::HOUSE_MODE){
+                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE){
                     // mouse -> canvas
                     int cx1 = mx - dst_rect.x;
                     int cy1 = my - dst_rect.y;
 
                     this->temporary_dragging_point = Point(cx1, cy1);
-                    if (this->temporary_in_list && !this->dynamic_houses.empty()){
-                        this->dynamic_houses.pop_back();
+                    if (this->temporary_in_list){
+                        /*if (this->mouse_state == MouseState::HOUSE_MODE && !this->dynamic_houses.empty())
+                            this->dynamic_houses.pop_back();
+                        if (this->mouse_state == MouseState::TREE_MODE && !this->dynamic_trees.empty())
+                            this->dynamic_trees.pop_back();*/
+                        if (!this->shapes.empty()) shapes.pop_back();
+
                         this->temporary_in_list = false;
                     }
 
-                    // escala px->universo
-                    double sx = double(App::universe_width)  / drawing_surface->w;
-                    double sy = double(App::universe_height) / drawing_surface->h;
-
-                    // Ponto inicial já está em canvas (cx0,cy0) pois você salvou assim no mouse down
-                    double cx0 = double(this->initial_point.get_x());
-                    double cy0 = double(this->initial_point.get_y());
-
-                    // IMPORTANTE: universo tem Y pra cima -> inverta Y aqui!
-                    double uix = cx0 * sx;
-                    double uiy = (drawing_surface->h - cy0) * sy;
-
-                    double ufx = cx1 * sx;
-                    double ufy = (drawing_surface->h - cy1) * sy;
-
-                    // normaliza pro canto inferior-esquerdo + tamanhos positivos
-                    double ux = std::min(uix, ufx);   // x de origem da casa (universo)
-                    double uy = std::min(uiy, ufy);   // y de origem da casa (universo, BASE da casa)
-                    double uw = std::fabs(ufx - uix); // largura (universo)
-                    double uh = std::fabs(ufy - uiy); // altura  (universo)
+                    Point c0 = Point(this->initial_point.get_x(), this->initial_point.get_y());
+                    Point c1 = Point(this->temporary_dragging_point.get_x(), this->temporary_dragging_point.get_y());
+                    Utils::UniverseRect ur = Utils::canvas_drag_to_universe(c0, c1, drawing_surface->w, drawing_surface->h, App::universe_width, App::universe_height);
 
                     // Construtor do House é (width, height, x_origin, y_origin, cores...)
                     Uint32 c = SDL_MapRGB(surface->format, 255, 100, 50);
-                    House temp_casa( int(std::lround(uw)),
-                                     int(std::lround(uh)),
-                                     int(std::lround(ux)),
-                                     int(std::lround(uy)),
-                                     c, c, c);
 
-                    dynamic_houses.emplace_back(temp_casa);
-
+                    if (this->mouse_state == MouseState::HOUSE_MODE){
+                        /*House temp_casa( int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c, c);
+                        this->dynamic_houses.emplace_back(temp_casa);*/
+                        //this->dynamic_shapes.emplace_back(temp_casa);
+                        shapes.emplace_back(std::unique_ptr<Shape>(new House( int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c, c)));
+                    }
+                    else if (this->mouse_state == MouseState::TREE_MODE){
+                        /*Tree temp_arvore(int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c, c);
+                        this->dynamic_trees.emplace_back(temp_arvore);*/
+                        shapes.emplace_back(std::unique_ptr<Shape>(new Tree (int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c, c)));
+                    }
                     // limpa estado do drag
                     this->temporary_in_list = true;
                 }
             }
         } else if (event.type == SDL_MOUSEBUTTONUP){
-            if (this->mouse_state == MouseState::HOUSE_MODE && this->mouse_down == true && event.button.button == SDL_BUTTON_LEFT){
-                //Instancia nova casa
-                if (this->temporary_in_list){
-                    this->dynamic_houses.pop_back();
-                    this->temporary_in_list = false;
-                }
-
-                // mouse -> canvas
-                Point c0 { int(this->initial_point.get_x()), int(this->initial_point.get_y()) };
-                //Recebe último ponto válido registrado
-                Point c1 = Point(this->temporary_dragging_point.get_x(), this->temporary_dragging_point.get_y());
-                if (inside_rect(mx, my, dst_rect)){ //Se o mouse estiver na drawing_surface
-                    c1 = Point(mx - dst_rect.x, my - dst_rect.y); //Pega posição do mouse atual mapeada para universo
-                }
-
-                auto ur = Utils::canvas_drag_to_universe(c0, c1, drawing_surface->w, drawing_surface->h,
-                                  App::universe_width, App::universe_height);
-                /*
-                // escala px->universo
-                double sx = double(App::universe_width)  / drawing_surface->w;
-                double sy = double(App::universe_height) / drawing_surface->h;
-
-                // Ponto inicial já está em canvas (cx0,cy0) pois você salvou assim no mouse down
-                double cx0 = double(this->initial_point.get_x());
-                double cy0 = double(this->initial_point.get_y());
-
-                // IMPORTANTE: universo tem Y pra cima -> inverta Y aqui!
-                double uix = cx0 * sx;
-                double uiy = (drawing_surface->h - cy0) * sy;
-
-                double ufx = cx1 * sx;
-                double ufy = (drawing_surface->h - cy1) * sy;
-
-                // normaliza pro canto inferior-esquerdo + tamanhos positivos
-                double ux = std::min(uix, ufx);   // x de origem da casa (universo)
-                double uy = std::min(uiy, ufy);   // y de origem da casa (universo, BASE da casa)
-                double uw = std::fabs(ufx - uix); // largura (universo)
-                double uh = std::fabs(ufy - uiy); // altura  (universo)
-                */
-                // Construtor do House é (width, height, x_origin, y_origin, cores...)
-                Uint32 c = SDL_MapRGB(surface->format, 255, 100, 50);
-                House temp_casa( int(std::lround(ur.w)),
-                 int(std::lround(ur.h)),
-                 int(std::lround(ur.x)),
-                 int(std::lround(ur.y)),
-                 c, c, c);
-
-                dynamic_houses.emplace_back(temp_casa);
-
+            if (( this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE)
+                && this->mouse_down == true && event.button.button == SDL_BUTTON_LEFT){
                 // limpa estado do drag
                 this->initial_point = Point(0,0);
                 this->temporary_dragging_point = Point(0,0);

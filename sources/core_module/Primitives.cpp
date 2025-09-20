@@ -819,3 +819,33 @@ void Primitives::flood_fill_log(SDL_Surface* surface, int x, int y, Uint32 fill_
         printf("FEEL THE FLOOD");
     }
 }
+
+void Primitives::draw_rotated_ellipse(SDL_Surface* surface,int cx, int cy, int rx, int ry,float angle_rad, Uint32 color, bool filled)
+{
+    if (!surface) return;
+    SDL_Color col = Colors::uint32_to_sdlcolor(surface, color);
+
+    float c = cosf(angle_rad), s = sinf(angle_rad);
+    int margin = (rx > ry ? rx : ry) + 2;
+    int samples = 4; // 4x4
+
+    for (int y = cy - margin; y <= cy + margin; ++y) {
+        for (int x = cx - margin; x <= cx + margin; ++x) {
+            int inside = 0;
+            for (int sy = 0; sy < samples; ++sy) {
+                for (int sx = 0; sx < samples; ++sx) {
+                    float dx = (x + (sx + 0.5f)/samples) - cx;
+                    float dy = (y + (sy + 0.5f)/samples) - cy;
+                    // leva p/ o frame da elipse (rotação inversa)
+                    float u =  c*dx + s*dy;
+                    float v = -s*dx + c*dy;
+                    float val = (u*u)/(rx*rx) + (v*v)/(ry*ry);
+                    if (filled ? (val <= 1.0f) : (fabsf(val - 1.0f) <= 0.07f)) inside++;
+                }
+            }
+            float cov = (float)inside / (samples*samples);
+            if (cov > 0.0f) Primitives::blend_pixel(surface, x, y, col, cov);
+        }
+    }
+}
+
