@@ -9,6 +9,9 @@ This project started as an academic initiative by the authors during their Compu
 ## Release notes
 This section documents all major updates, improvements, and newly added features.
 
+### Release 0.2.0
+- Added drag and drop instancing of shapes.
+
 ### Release 0.1.4
 - Added the notification system.
 
