@@ -11,23 +11,7 @@ class Utils {
 
         static double to_radians(double degrees);
 
-        // ========= MATRIZ 2D AFIM (3x3) =========
-        typedef struct Matrix {
-            double m[3][3];
-        } Matrix;
-
-        // Construção/composição
-        static Matrix mat_identity();
-        static Matrix mat_multiply(const Matrix A, const Matrix B);   // A * B
-        static Point  mat_apply(const Matrix M, Point p);             // M * [x y 1]^T
-
-        static Matrix mat_translate(double dx, double dy);            // Tr
-        static Matrix mat_rotate_deg(double degrees);                 // R (graus)
-        static Matrix mat_scale(double sx, double sy);                // S
-
-        // Aplica pivô: T(-c) * M * T(c)
-        static Matrix mat_with_pivot(const Matrix M, Point c);
-
+        static double perp_dist(double px, double py,double ax, double ay,double bx, double by);
         struct UniverseRect  { double x, y, w, h; };
 
         static Point screen_to_canvas(int mx, int my, const UniverseRect& dst_rect);

@@ -352,7 +352,7 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
  *       based on the maximum delta between the first and last control points
  *       to ensure smooth rendering even for steep curves.
  */
-void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
+void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
     if (Utils::verify_limits(surface, x0, y0) == 0) return;
     if (Utils::verify_limits(surface, x1, y1) == 0) return;
     if (Utils::verify_limits(surface, x2, y2) == 0) return;
@@ -385,6 +385,111 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
     }
 }
 
+void Primitives::draw_flat_curve(SDL_Surface* surface,
+                            int x0, int y0, int x1, int y1,
+                            int x2, int y2, int x3, int y3,
+                            Uint32 color, bool anti_aliasing) {
+    if (!surface) return;
+    // Se preferir manter o guard original, ok; mas remover os 4 checks evita "sumir" a curva
+    // caso algum controle fique fora, já que vamos desenhar com clipping do draw_line.
+    // if (Utils::verify_limits(surface, x0, y0) == 0) return;
+    // if (Utils::verify_limits(surface, x1, y1) == 0) return;
+    // if (Utils::verify_limits(surface, x2, y2) == 0) return;
+    // if (Utils::verify_limits(surface, x3, y3) == 0) return;
+
+    struct V2 { double x, y; };
+    auto line_len = [](V2 a, V2 b) {
+        double dx = a.x - b.x, dy = a.y - b.y;
+        return std::sqrt(dx*dx + dy*dy);
+    };
+    auto perp_dist = [](V2 p, V2 a, V2 b) {
+        // distância perpendicular de p ao segmento (a,b) usando área do paralelogramo
+        double dx = b.x - a.x, dy = b.y - a.y;
+        double num = std::abs(dy*(p.x - a.x) - dx*(p.y - a.y));
+        double den = std::sqrt(dx*dx + dy*dy);
+        return (den > 0.0) ? (num / den) : 0.0;
+    };
+
+    const double TOL = 0.5;      // tolerância em pixels (0.5 px costuma ser ótimo)
+    const int    MAX_DEPTH = 16; // trava p/ evitar recursão infinita
+
+    V2 P0{(double)x0,(double)y0}, P1{(double)x1,(double)y1};
+    V2 P2{(double)x2,(double)y2}, P3{(double)x3,(double)y3};
+
+    // desenha um segmento (escolhe AA ou não)
+    auto draw_seg = [&](V2 a, V2 b) {
+        if (anti_aliasing) {
+            Primitives::draw_xiaolin_wu_line(surface,
+                (int)std::lround(a.x),(int)std::lround(a.y),
+                (int)std::lround(b.x),(int)std::lround(b.y),
+                color);
+        } else {
+            Primitives::draw_bresenham_line(surface,
+                (int)std::lround(a.x),(int)std::lround(a.y),
+                (int)std::lround(b.x),(int)std::lround(b.y),
+                color);
+        }
+    };
+
+    // subdivide até ficar "plano" o suficiente
+    std::function<void(V2,V2,V2,V2,int)> recurse = [&](V2 A, V2 B, V2 C, V2 D, int depth) {
+        // critério de planicidade: distâncias de B e C à reta AD
+        double d1 = perp_dist(B, A, D);
+        double d2 = perp_dist(C, A, D);
+        // também evita over-subdividir segmentos já bem pequenos
+        double chord = line_len(A, D);
+
+        if ((std::max(d1, d2) <= TOL) || depth >= MAX_DEPTH || chord <= 1.0) {
+            draw_seg(A, D);
+            return;
+        }
+
+        // De Casteljau: subdivisão em duas cúbicas
+        V2 AB{(A.x+B.x)*0.5, (A.y+B.y)*0.5};
+        V2 BC{(B.x+C.x)*0.5, (B.y+C.y)*0.5};
+        V2 CD{(C.x+D.x)*0.5, (C.y+D.y)*0.5};
+
+        V2 ABC{(AB.x+BC.x)*0.5, (AB.y+BC.y)*0.5};
+        V2 BCD{(BC.x+CD.x)*0.5, (BC.y+CD.y)*0.5};
+
+        V2 ABCD{(ABC.x+BCD.x)*0.5, (ABC.y+BCD.y)*0.5}; // ponto médio na curva
+
+        // recursão nas duas metades
+        recurse(A,   AB,  ABC, ABCD, depth+1);
+        recurse(ABCD, BCD, CD,  D,    depth+1);
+    };
+
+    recurse(P0, P1, P2, P3, 0);
+}
+
+void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
+    // "Flatness" da cúbica: maior distância dos pontos de controle internos
+    // à reta que liga as extremidades (em pixels).
+    double d1 = Utils::perp_dist((double)x1, (double)y1, (double)x0, (double)y0, (double)x3, (double)y3);
+    double d2 = Utils::perp_dist((double)x2, (double)y2, (double)x0, (double)y0, (double)x3, (double)y3);
+    double flatness = std::max(d1, d2);
+
+    //Reference surface size
+    const int REF_W = 895;
+    const int REF_H = 503;
+    //Reference thrheshold
+    const double BASE_THR = 10.0;
+    const double MIN_THR  = 3.0, MAX_THR = 24.0;
+
+    //Gets the diagonal of the surface
+    double diag     = std::hypot(double(surface->w), double(surface->h));
+    double diag_ref = std::hypot(double(REF_W),       double(REF_H));
+
+    int thr_px = Utils::clampi(BASE_THR * (diag / diag_ref), MIN_THR, MAX_THR);
+
+    if (flatness <= thr_px) {
+        // curva “plana o suficiente” → simples
+        Primitives::draw_bezier_curve(surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
+    } else {
+        // curva acentuada → robusta (subdivisão/adaptativa em linhas conectadas)
+        Primitives::draw_flat_curve  (surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
+    }
+}
 
 // METHOD IMPLEMENTATION
 /**

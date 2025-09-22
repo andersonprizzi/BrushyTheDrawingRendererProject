@@ -17,6 +17,13 @@ House::House(int width, int height, int universe_x_origin, int universe_y_origin
     this->colors[1] = color_door;
     this->colors[2] = color_roof;
 
+    this->pts = {
+        &this->wall_top_left, &this->wall_top_right, &this->wall_bottom_right, &this->wall_bottom_left,
+        &this->door_top_left, &this->door_top_right, &this->door_bottom_right, &this->door_bottom_left,
+        &this->roof_peak, &this->wall_fill, &this->door_fill, &this->roof_fill
+        // se tiver pontos de fill, pode adicioná-los aqui também
+    };
+
     this->generate_points();
     //reset_transform();
 }
@@ -52,13 +59,6 @@ void House::rotate_figure(double angle)
     cosTheta = cos(radians);
     sinTheta = sin(radians);
 
-    Point* pts[] = {
-        &this->wall_top_left, &this->wall_top_right, &this->wall_bottom_right, &this->wall_bottom_left,
-        &this->door_top_left, &this->door_top_right, &this->door_bottom_right, &this->door_bottom_left,
-        &this->roof_peak, &this->wall_fill, &this->door_fill, &this->roof_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
-
     for(Point* p : pts) {
         x = (double)p->get_x();
         y = (double)p->get_y();
@@ -71,12 +71,6 @@ void House::rotate_figure(double angle)
 
 void House::translate(double dx, double dy){
     double x, y;
-    Point* pts[] = {
-        &this->wall_top_left, &this->wall_top_right, &this->wall_bottom_right, &this->wall_bottom_left,
-        &this->door_top_left, &this->door_top_right, &this->door_bottom_right, &this->door_bottom_left,
-        &this->roof_peak, &this->wall_fill, &this->door_fill, &this->roof_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
 
     for(Point* p : pts) {
         x = (double)p->get_x();
@@ -91,12 +85,7 @@ void House::scale(double sx, double sy){
     dx = (double)this->wall_bottom_left.get_x();
     dy = (double)this->wall_bottom_left.get_y();
     this->translate(-dx,-dy);
-    Point* pts[] = {
-        &this->wall_top_left, &this->wall_top_right, &this->wall_bottom_right, &this->wall_bottom_left,
-        &this->door_top_left, &this->door_top_right, &this->door_bottom_right, &this->door_bottom_left,
-        &this->roof_peak, &this->wall_fill, &this->door_fill, &this->roof_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
+
 
     for(Point* p : pts) {
         x = (double)p->get_x();
@@ -109,22 +98,6 @@ void House::scale(double sx, double sy){
 
     this->width  = (int)lround(this->width  * sx);
     this->height = (int)lround(this->height * sy);
-}
-
-void House::change_height(double new_height){
-    this->height = new_height;
-    House::generate_points();
-}
-
-void House::change_width(double new_width){
-    this->width = new_width;
-    House::generate_points();
-}
-
-void House::change_origin(Point new_origin){
-    this->x_origin = new_origin.get_x();
-    this->y_origin = new_origin.get_y();
-    House::generate_points();
 }
 
 void House::draw(SDL_Surface* surface) {

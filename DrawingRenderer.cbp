@@ -60,10 +60,12 @@
 		<Unit filename="headers/graphics_module/ImageComponent.h" />
 		<Unit filename="headers/graphics_module/TextboxComponent.h" />
 		<Unit filename="headers/shapes_module/Circle.h" />
+		<Unit filename="headers/shapes_module/Fence.h" />
 		<Unit filename="headers/shapes_module/House.h" />
 		<Unit filename="headers/shapes_module/Point.h" />
 		<Unit filename="headers/shapes_module/Polygon.h" />
 		<Unit filename="headers/shapes_module/Shape.h" />
+		<Unit filename="headers/shapes_module/Sun.h" />
 		<Unit filename="headers/shapes_module/Tree.h" />
 		<Unit filename="sources/core_module/App.cpp" />
 		<Unit filename="sources/core_module/Colors.cpp" />
@@ -80,10 +82,12 @@
 		<Unit filename="sources/graphics_module/ImageComponent.cpp" />
 		<Unit filename="sources/graphics_module/TextboxComponent.cpp" />
 		<Unit filename="sources/shapes_module/Circle.cpp" />
+		<Unit filename="sources/shapes_module/Fence.cpp" />
 		<Unit filename="sources/shapes_module/House.cpp" />
 		<Unit filename="sources/shapes_module/Point.cpp" />
 		<Unit filename="sources/shapes_module/Polygon.cpp" />
 		<Unit filename="sources/shapes_module/Shape.cpp" />
+		<Unit filename="sources/shapes_module/Sun.cpp" />
 		<Unit filename="sources/shapes_module/Tree.cpp" />
 		<Extensions>
 			<DoxyBlocks>

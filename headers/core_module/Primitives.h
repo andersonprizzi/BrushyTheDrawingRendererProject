@@ -11,7 +11,8 @@ class Primitives {
         static void draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int x2, int y2, Uint32 color);
         static void draw_bresenham_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int ry, Uint32 color, bool filled);
         static void draw_supersampled_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int ry, Uint32 color, bool filled);
-
+        static void draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing);
+        static void draw_flat_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing);
     public:
         static void set_pixel(SDL_Surface* surface, int x, int y, Uint32 color);
         static void  fill_polygon(SDL_Surface* s, const std::vector<SDL_Point>& pts, Uint32 color);

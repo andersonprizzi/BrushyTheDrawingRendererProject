@@ -17,15 +17,20 @@ Tree::Tree(int width, int height, int universe_x_origin, int universe_y_origin, 
     this->colors[1] = color_leaves;
     this->colors[2] = color_apple;
 
+    this->pts = {
+        &this->trunk_bottom_left , &this->trunk_bottom_right, &this->trunk_top_right , &this->trunk_top_left,
+        &this->trunk_left_bezier_point, &this->trunk_right_bezier_point,
+        &this->leaves_first_elipsis_center, &this->leaves_second_elipsis_center, &this->leaves_third_elipsis_center ,
+        &this->apple_center, &this->apple2_center, &this->trunk_fill
+    };
     this->generate_points();
-    //reset_transform();
-}
+ }
 
 void Tree::generate_points() {
     this->trunk_bottom_left = Point(this->x_origin + 0.0 * this->width, this->y_origin + 0.0 * this->height);
-    this->trunk_bottom_right = Point(this->x_origin + 1.0 * this->width, this->y_origin + 0.0 * this->height);
-    this->trunk_top_right = Point(this->x_origin + 1.0 * this->width, this->y_origin + 0.75 * this->height);
-    this->trunk_top_left = Point(this->x_origin + 0.0 * this->width, this->y_origin + 0.75 * this->height);
+    this->trunk_bottom_right = Point(this->x_origin + 1 * this->width, this->y_origin + 0.0 * this->height);
+    this->trunk_top_right = Point(this->x_origin + 0.8 * this->width, this->y_origin + 0.75 * this->height);
+    this->trunk_top_left = Point(this->x_origin + 0.2 * this->width, this->y_origin + 0.75 * this->height);
     this->trunk_left_bezier_point = Point(this->x_origin + 0.7 * this->width, this->y_origin + 0.25 * this->height);
     this->trunk_right_bezier_point = Point(this->x_origin + 0.3 * this->width, this->y_origin + 0.25 * this->height);
 
@@ -36,7 +41,7 @@ void Tree::generate_points() {
     this->apple_center = Point(this->x_origin + 0.64 * this->width, this->y_origin + 0.69 * this->height);
     this->apple2_center = Point(this->x_origin + 0.32 * this->width, this->y_origin + 0.86 * this->height);
 
-    this->trunk_fill = Point(this->x_origin + 1.0 * this->width, this->x_origin + 0.25 * this->width);
+    this->trunk_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.375 * this->height);
     //Não precisa para elipses e círculos, só pinta como filled
     /*
     this->apple_fill = Point(0, 0);
@@ -63,14 +68,6 @@ void Tree::rotate_figure(double angle)
     cosTheta = cos(radians);
     sinTheta = sin(radians);
 
-    Point* pts[] = {
-        &this->trunk_bottom_left , &this->trunk_bottom_right, &this->trunk_top_right , &this->trunk_top_left,
-        &this->trunk_left_bezier_point, &this->trunk_right_bezier_point,
-        &this->leaves_first_elipsis_center, &this->leaves_second_elipsis_center, &this->leaves_third_elipsis_center ,
-        &this->apple_center, &this->apple2_center, &this->trunk_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
-
     for(Point* p : pts) {
         x = (double)p->get_x();
         y = (double)p->get_y();
@@ -83,13 +80,6 @@ void Tree::rotate_figure(double angle)
 
 void Tree::translate(double dx, double dy){
     double x, y;
-    Point* pts[] = {
-        &this->trunk_bottom_left , &this->trunk_bottom_right, &this->trunk_top_right , &this->trunk_top_left,
-        &this->trunk_left_bezier_point, &this->trunk_right_bezier_point,
-        &this->leaves_first_elipsis_center, &this->leaves_second_elipsis_center, &this->leaves_third_elipsis_center ,
-        &this->apple_center, &this->apple2_center, &this->trunk_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
 
     for(Point* p : pts) {
         x = (double)p->get_x();
@@ -100,47 +90,44 @@ void Tree::translate(double dx, double dy){
 }
 
 void Tree::scale(double sx, double sy){
-    double dx, dy, x, y;
-    dx = (double)this->trunk_bottom_left.get_x();
-    dy = (double)this->trunk_bottom_left.get_y();
-    this->translate(-dx,-dy);
-    Point* pts[] = {
-        &this->trunk_bottom_left , &this->trunk_bottom_right, &this->trunk_top_right , &this->trunk_top_left,
-        &this->trunk_left_bezier_point, &this->trunk_right_bezier_point,
-        &this->leaves_first_elipsis_center, &this->leaves_second_elipsis_center, &this->leaves_third_elipsis_center ,
-        &this->apple_center, &this->apple2_center, &this->trunk_fill
-        // se tiver pontos de fill, pode adicioná-los aqui também
-    };
+    double dx, dy, x, y, radians, cosTheta, sinTheta;
 
-    for(Point* p : pts) {
+    // ancora no canto inferior esquerdo (mesmo do rotate)
+    dx = (double)this->trunk_bottom_left.get_x();
+    dy = (double)this->trunk_bottom_left.get_y();
+    this->translate(-dx, -dy);
+
+    // usa a rotacao atual da arvore como referencial local
+    radians  = this->rotated_angle;
+    cosTheta = cos(radians);
+    sinTheta = sin(radians);
+
+    for (Point* p : pts) {
+        // leva o ponto para o referencial LOCAL (desrotaciona por -radians)
         x = (double)p->get_x();
         y = (double)p->get_y();
-        p->set_x(x * sx);
-        p->set_y(y * sy);
+
+        double lx =  x *  cosTheta + y * sinTheta; // R(-theta)
+        double ly = -x *  sinTheta + y * cosTheta;
+
+        // escala nos eixos locais
+        lx = lx * sx;
+        ly = ly * sy;
+
+        // volta para o mundo (rotaciona por +radians)
+        double wx = lx * cosTheta - ly * sinTheta; // R(+theta)
+        double wy = lx * sinTheta + ly * cosTheta;
+
+        p->set_x(wx);
+        p->set_y(wy);
     }
 
-    this->translate(dx,dy);
+    this->translate(dx, dy);
 
+    // Atualiza dimensoes logicas (usadas p/ raios das folhas/macas na draw)
     this->width  = (int)lround(this->width  * sx);
     this->height = (int)lround(this->height * sy);
 }
-
-void Tree::change_height(double new_height){
-    this->height = new_height;
-    Tree::generate_points();
-}
-
-void Tree::change_width(double new_width){
-    this->width = new_width;
-    Tree::generate_points();
-}
-
-void Tree::change_origin(Point new_origin){
-    this->x_origin = new_origin.get_x();
-    this->y_origin = new_origin.get_y();
-    Tree::generate_points();
-}
-
 
 void Tree::draw(SDL_Surface* surface) {
     if (!surface) return;
@@ -185,15 +172,14 @@ void Tree::draw(SDL_Surface* surface) {
         this->trunk_color, false);
 
     // preenchimento do tronco
-    double trunk_fill_u_x = (this->trunk_bottom_left.get_x() + this->trunk_top_right.get_x()) * 0.5;
-    double trunk_fill_u_y = (this->trunk_bottom_left.get_y() + this->trunk_top_right.get_y()) * 0.5;
-    Point  trunk_fill     = Utils::universe_to_canvas(Point(trunk_fill_u_x, trunk_fill_u_y), device_width, device_height, universe_width, universe_height);
+    Point  trunk_fill     = Utils::universe_to_canvas(Point(this->trunk_fill.get_x(), this->trunk_fill.get_y()), device_width, device_height, universe_width, universe_height);
     Primitives::flood_fill(surface, (int)trunk_fill.get_x(), (int)trunk_fill.get_y(), this->trunk_color);
+    //Primitives::set_pixel(surface, (int)trunk_fill.get_x(), (int)trunk_fill.get_y(), this->trunk_color);
 
     // --- FOLHAS: 3 elipses preenchidas ---
     // raios em unidades do “universo”
-    double rx1_u = 0.38 * this->width,  ry1_u = 0.22 * this->height; // central
-    double rx2_u = 0.28 * this->width,  ry2_u = 0.18 * this->height; // laterais
+    double rx1_u = 0.38 * this->width,  ry1_u = 0.22 * this->height; // raio da elipse central
+    double rx2_u = 0.235 * this->width,  ry2_u = 0.18 * this->height; // raio dsa elipses laterais
     double cA = cos(this->rotated_angle);
     double sA = sin(this->rotated_angle);
 

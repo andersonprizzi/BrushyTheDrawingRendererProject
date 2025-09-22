@@ -33,10 +33,10 @@ private:
     Point door_fill = Point(0, 0);
     Point roof_fill = Point(0, 0);
 
-    void generate_points();
-    /*Matrix identity();
-    Matrix multiply(const Matrix A, const Matrix B); // A*B
-    Point apply(const Matrix M, Point point);*/
+    std::array<Point*, 12> pts;
+
+    void generate_points() override;
+
 
 public:
     int height = 0, width = 0, x_origin = 0, y_origin = 0;
@@ -45,18 +45,20 @@ public:
 
     House(int width, int height, int universe_x_origin, int universe_y_origin, Uint32 color_walls, Uint32 color_door, Uint32 color_roof);
 
-    void draw(SDL_Surface* surface);
+    void draw(SDL_Surface* surface) override;
 
+    /*
     void change_height(double new_height);
     void change_width(double new_width);
     void change_origin(Point new_origin);
+    */
 
-    void reset_transform();                                 // volta para identidade
-    void translate(double dx, double dy);
-    void scale(double sx, double sy);                   // T = T * Tr
+    //void reset_transform();                                 // volta para identidade
+    void translate(double dx, double dy) override;
+    void scale(double sx, double sy) override;                   // T = T * Tr
     //void rotate_figure(SDL_Surface* surface, double degrees, Point center); // T = T * R(pivô)
-    void rotate_figure(double angle);
-    void scale(double sx, double sy, Point center);
+    void rotate_figure(double angle) override;
+    //void scale(double sx, double sy, Point center);
 };
 
 #endif

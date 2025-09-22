@@ -33,6 +33,7 @@ class NotificationManager;
 class House;
 class Tree;
 class Shape;
+class Sun;
 // Header files.
 #include "Colors.h"
 #include "Utils.h"
@@ -51,6 +52,9 @@ class Shape;
 #include "Polygon.h"
 #include "House.h"
 #include "Tree.h"
+#include "Fence.h"
+#include "Sun.h"
+
 enum class AppState {
     MENU_SCREEN,
     NEW_PROJECT_SCREEN,
@@ -59,10 +63,14 @@ enum class AppState {
 
 enum class MouseState {
     NORMAL_MODE,
+    ERASER_MODE,
+    LINE_MODE,
     PENCIL_MODE,
     BUCKET_MODE,
     HOUSE_MODE,
-    TREE_MODE
+    TREE_MODE,
+    FENCE_MODE,
+    SUN_MODE
 };
 
 class App {
@@ -102,9 +110,9 @@ class App {
         //======================================
         //PARADAS PARA GUI DO PAINT 2
         std::list<Point> points;
+        std::list<Point> eraser_points;
         std::list<Point> fill_points;
-        std::list<House> dynamic_houses;
-        std::list<Tree> dynamic_trees;
+        std::list<std::array<Point,2>> lines;
 
         std::vector<std::unique_ptr<Shape> > shapes;
 
@@ -114,10 +122,14 @@ class App {
         Point temporary_dragging_point = Point(0,0);
         Point initial_point = Point(0,0);
         //BOTÕES
+        ButtonComponent* eraser_button;
         ButtonComponent* pencil_button;
         ButtonComponent* bucket_button;
+        ButtonComponent* line_button;
         ButtonComponent* house_button;
         ButtonComponent* tree_button;
+        ButtonComponent* fence_button;
+        ButtonComponent* sun_button;
 
         Uint32 primary_colors[4]; //Pensei pra colocar tuas cores e tal, mas daí tu se vira pra implementar kkk boa sorte
         //======================================

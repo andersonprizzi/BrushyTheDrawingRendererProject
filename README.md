@@ -9,6 +9,9 @@ This project started as an academic initiative by the authors during their Compu
 ## Release notes
 This section documents all major updates, improvements, and newly added features.
 
+### Release 0.2.1
+- Added drag and drop instantiation of several new shapes.
+
 ### Release 0.2.0
 - Added drag and drop instancing of shapes.
 
@@ -35,3 +38,6 @@ This section acknowledges the resources and contributions that made this project
 - **Libraries:**
   - [SDL2](https://www.libsdl.org/): main rendering and window management.  
   - [SDL2_ttf](https://www.libsdl.org/projects/SDL_ttf/): text rendering.  
+
+## Setting up for development
+This project's folder structure was thought to make collaboration easier. Every external library is contianed in a folder called `external`. The code used for compiling the project is available at compile.txt, which is present in the root folder. The project uses [mingw32's](https://sourceforge.net/projects/mingw/) g++ for compiling. The authors are available to help setting up the project in case of any trouble. For that, open an issue in the project's repository in GitHub and explain your circumstances. We're waiting for your collaboration!

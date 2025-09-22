@@ -28,6 +28,13 @@ int Utils::verify_limits(SDL_Surface* surface, int x, int y) {
     return 1;
 }
 
+double  Utils::perp_dist(double px, double py,double ax, double ay,double bx, double by)
+{
+    double dx = bx - ax, dy = by - ay;
+    double num = std::abs(dy * (px - ax) - dx * (py - ay));
+    double den = std::sqrt(dx*dx + dy*dy);
+    return (den > 0.0) ? (num / den) : 0.0;
+};
 
 // METHOD IMPLEMENTATION
 /**

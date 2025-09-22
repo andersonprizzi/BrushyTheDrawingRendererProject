@@ -186,6 +186,7 @@ void App::run() {
         Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
+    //========================================================================
     //RENDER UI BUTTONS
     this->pencil_button = new ButtonComponent(
         static_cast<int>(window_width * 0.01),
@@ -198,8 +199,19 @@ void App::run() {
         Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
-    this->bucket_button = new ButtonComponent(
+    this->eraser_button = new ButtonComponent(
         static_cast<int>(window_width * 0.1),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(btn_w/4),
+        static_cast<int>(this->default_button_height / 1.5),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Eraser",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->bucket_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.19),
         static_cast<int>(window_height * 0.01),
         static_cast<int>(btn_w/4),
         static_cast<int>(this->default_button_height / 1.5),
@@ -209,8 +221,19 @@ void App::run() {
         Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
+    this->line_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.28),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(btn_w/4),
+        static_cast<int>(this->default_button_height / 1.5),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Line",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
     this->house_button = new ButtonComponent(
-        static_cast<int>(window_width * 0.19),
+        static_cast<int>(window_width * 0.37),
         static_cast<int>(window_height * 0.01),
         static_cast<int>(btn_w/4),
         static_cast<int>(this->default_button_height / 1.5),
@@ -221,7 +244,7 @@ void App::run() {
     );
 
     this->tree_button = new ButtonComponent(
-        static_cast<int>(window_width * 0.28),
+        static_cast<int>(window_width * 0.46),
         static_cast<int>(window_height * 0.01),
         static_cast<int>(btn_w/4),
         static_cast<int>(this->default_button_height / 1.5),
@@ -231,6 +254,28 @@ void App::run() {
         Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
 
+    this->fence_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.55),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(btn_w/4),
+        static_cast<int>(this->default_button_height / 1.5),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Fence",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->sun_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.64),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(btn_w/4),
+        static_cast<int>(this->default_button_height / 1.5),
+        Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Sun",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->surface, Colors::get_color(this->surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+    //========================================================================
 
     // Creating textbox components.
     width_textbox = new TextboxComponent(
@@ -255,10 +300,10 @@ void App::run() {
     Uint32 blue = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "blue");
     Uint32 black = Colors::get_color(this->surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
 
-    Polygon *polygon_1 = new Polygon(true, false, green);
+    /*Polygon *polygon_1 = new Polygon(true, false, green);
     polygon_1->add_point(Point(350, 400));
     polygon_1->add_point(Point(260, 300));
-    polygon_1->add_point(Point(268, 250));
+    polygon_1->add_point(Point(268, 250));*/
 
 
     // Execution loop.
@@ -322,14 +367,27 @@ void App::run() {
             // Limpa o canvas de desenho com fundo branco
             SDL_FillRect(drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
 
-            polygon_1->draw(drawing_surface);
+            //polygon_1->draw(drawing_surface);
 
             //Primitives::draw_ellipse(drawing_surface, 200, 200, 100, 50, black, true, true);
 
-            Tree arvre = Tree(20, 20, 50, 35, black, green, red);
-            //arvre.rotate_figure(65);
-            arvre.scale(2, 1);
+            /*Tree arvre = Tree(20, 20, 50, 35, black, green, red);
+            arvre.scale(1.5, 1);
+            arvre.change_height(10);
+            arvre.change_origin(Point(40,20));
+            arvre.rotate_figure(65);
             arvre.draw(drawing_surface);
+*/
+            Sun sol = Sun(20, 20, 50, 35, green, red);
+            //sol.scale(3, 1);
+            sol.rotate_figure(15);
+            sol.draw(drawing_surface);
+
+            Fence cerca2 = Fence(20, 20, 30, 35, black, green);
+            cerca2.rotate_figure(50);
+            cerca2.scale(1.1, 0.5);
+            cerca2.translate(-15, 13);
+            cerca2.draw(drawing_surface);
 
             //House casinha = House(30,20,50,35,red,blue,green);
             //casinha.draw(drawing_surface);
@@ -349,28 +407,30 @@ void App::run() {
             //Imprime pontos gerados pelo
             for (Point p : this->points) {
                 //printf("(%f, %f)\n", p.get_x(), p.get_y());
-                Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100);
+                Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
                 Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
             }
 
             for (Point p : this->fill_points) {
                 //printf("(%f, %f)\n", p.get_x(), p.get_y());
-                Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100);
+                Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
                 Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), p_color);
             }
 
-            for (House casa : this->dynamic_houses) {
-                //printf("(%f, %f)\n", p.get_x(), p.get_y());
-                casa.draw(drawing_surface);
-            }
-
-            for (Tree arvore : this->dynamic_trees) {
-                //printf("(%f, %f)\n", p.get_x(), p.get_y());
-                arvore.draw(drawing_surface);
+            for (auto& seg : lines) {
+                Point& p0 = seg[0];  // agora tem []
+                Point& p1 = seg[1];
+                Primitives::draw_line(drawing_surface, p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), black, true);
             }
 
             for (size_t i = 0; i < shapes.size(); ++i) {
                 shapes[i]->draw(drawing_surface);
+            }
+
+            for (Point p : this->eraser_points) {
+                //printf("(%f, %f)\n", p.get_x(), p.get_y());
+                Uint32 p_color = SDL_MapRGB(drawing_surface->format, 255, 255, 255); //TODO: TROCAR PARA COR DE FUNDO
+                Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
             }
 
             SDL_Rect dst_rect;
@@ -383,9 +443,13 @@ void App::run() {
 
             //Draw buttons
             this->pencil_button->draw(surface);
+            this->eraser_button->draw(surface);
             this->bucket_button->draw(surface);
+            this->line_button->draw(surface);
             this->house_button->draw(surface);
             this->tree_button->draw(surface);
+            this->fence_button->draw(surface);
+            this->sun_button->draw(surface);
 
             //printf("%d", this->mouse_state);
             //SDL_UpdateWindowSurface(window);
@@ -555,10 +619,24 @@ void App::handle_events() {
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->eraser_button->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::ERASER_MODE;
+                this->notification_manager->push({
+                        "Eraser mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
             } else if (this->app_state == AppState::RENDERING_SCREEN && this->bucket_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::BUCKET_MODE;
                 this->notification_manager->push({
                         "Bucket mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->line_button->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::LINE_MODE;
+                this->notification_manager->push({
+                        "Line mode",
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
@@ -580,25 +658,54 @@ void App::handle_events() {
                     });
                 this->mouse_down = false;
                 this->temporary_in_list = false;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->fence_button->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::FENCE_MODE;
+                this->notification_manager->push({
+                        "Fence mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->mouse_down = false;
+                this->temporary_in_list = false;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->sun_button->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::SUN_MODE;
+                this->notification_manager->push({
+                        "Sun mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->mouse_down = false;
+                this->temporary_in_list = false;
             } else if (this->app_state == AppState::RENDERING_SCREEN && inside_rect(mx, my, dst_rect) && event.button.button != SDL_BUTTON_RIGHT){
                 //DRAWING THINGS
                 if (this->mouse_state == MouseState::PENCIL_MODE){
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
-                    points.emplace_back(cx, cy);
+                    this->points.emplace_back(cx, cy);
+                } if (this->mouse_state == MouseState::ERASER_MODE){
+                    int cx = mx - dst_rect.x;     // coordenada X no canvas
+                    int cy = my - dst_rect.y;     // coordenada Y no canvas
+
+                    this->eraser_points.emplace_back(cx, cy);
                 } else if (this->mouse_state == MouseState::BUCKET_MODE) {
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
-                    fill_points.emplace_back(cx, cy);
-                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE) {
+                    this->fill_points.emplace_back(cx, cy);
+                }else if (this->mouse_state == MouseState::LINE_MODE) {
+                    int cx = mx - dst_rect.x;     // coordenada X no canvas
+                    int cy = my - dst_rect.y;     // coordenada Y no canvas
+
+                    this->initial_point = Point(cx, cy);
+                    this->lines.emplace_back(std::array<Point,2>{{ Point(cx,cy), Point(cx,cy) }});
+                    this->temporary_in_list = true;
+                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE || this->mouse_state == MouseState::FENCE_MODE || this->mouse_state == MouseState::SUN_MODE) {
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
                     this->initial_point = Point(cx, cy);
                     this->temporary_in_list = false;
-                    //this->dynamic_houses.emplace_back(cx, cy);
                 }
             }
 
@@ -614,17 +721,24 @@ void App::handle_events() {
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
                     points.emplace_back(cx, cy);
-                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE){
+                }else if (this->mouse_state == MouseState::ERASER_MODE){
+                    int cx = mx - dst_rect.x;     // coordenada X no canvas
+                    int cy = my - dst_rect.y;     // coordenada Y no canvas
+
+                    eraser_points.emplace_back(cx, cy);
+                }else if (this->mouse_state == MouseState::LINE_MODE){
+                    int cx = mx - dst_rect.x;     // coordenada X no canvas
+                    int cy = my - dst_rect.y;     // coordenada Y no canvas
+                    if (!this->lines.empty()) lines.pop_back();
+                    this->temporary_in_list = true;
+                    this->lines.emplace_back(std::array<Point,2>{{ initial_point, Point(cx,cy) }});
+                } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE || this->mouse_state == MouseState::FENCE_MODE || this->mouse_state == MouseState::SUN_MODE){
                     // mouse -> canvas
                     int cx1 = mx - dst_rect.x;
                     int cy1 = my - dst_rect.y;
 
                     this->temporary_dragging_point = Point(cx1, cy1);
                     if (this->temporary_in_list){
-                        /*if (this->mouse_state == MouseState::HOUSE_MODE && !this->dynamic_houses.empty())
-                            this->dynamic_houses.pop_back();
-                        if (this->mouse_state == MouseState::TREE_MODE && !this->dynamic_trees.empty())
-                            this->dynamic_trees.pop_back();*/
                         if (!this->shapes.empty()) shapes.pop_back();
 
                         this->temporary_in_list = false;
@@ -638,43 +752,44 @@ void App::handle_events() {
                     Uint32 c = SDL_MapRGB(surface->format, 255, 100, 50);
 
                     if (this->mouse_state == MouseState::HOUSE_MODE){
-                        /*House temp_casa( int(std::lround(ur.w)),
-                         int(std::lround(ur.h)),
-                         int(std::lround(ur.x)),
-                         int(std::lround(ur.y)),
-                         c, c, c);
-                        this->dynamic_houses.emplace_back(temp_casa);*/
-                        //this->dynamic_shapes.emplace_back(temp_casa);
                         shapes.emplace_back(std::unique_ptr<Shape>(new House( int(std::lround(ur.w)),
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
                          c, c, c)));
-                    }
-                    else if (this->mouse_state == MouseState::TREE_MODE){
-                        /*Tree temp_arvore(int(std::lround(ur.w)),
-                         int(std::lround(ur.h)),
-                         int(std::lround(ur.x)),
-                         int(std::lround(ur.y)),
-                         c, c, c);
-                        this->dynamic_trees.emplace_back(temp_arvore);*/
+                    } else if (this->mouse_state == MouseState::TREE_MODE){
                         shapes.emplace_back(std::unique_ptr<Shape>(new Tree (int(std::lround(ur.w)),
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
                          c, c, c)));
+                    } else if (this->mouse_state == MouseState::FENCE_MODE){
+                        shapes.emplace_back(std::unique_ptr<Shape>(new Fence (int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c)));
+                    } else if (this->mouse_state == MouseState::SUN_MODE){
+                        shapes.emplace_back(std::unique_ptr<Shape>(new Sun (int(std::lround(ur.w)),
+                         int(std::lround(ur.h)),
+                         int(std::lround(ur.x)),
+                         int(std::lround(ur.y)),
+                         c, c)));
                     }
                     // limpa estado do drag
                     this->temporary_in_list = true;
                 }
             }
         } else if (event.type == SDL_MOUSEBUTTONUP){
-            if (( this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE)
+            /*if (( this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE ||)
                 && this->mouse_down == true && event.button.button == SDL_BUTTON_LEFT){
                 // limpa estado do drag
                 this->initial_point = Point(0,0);
                 this->temporary_dragging_point = Point(0,0);
-            } else if (event.button.button == SDL_BUTTON_RIGHT && mouse_down == false) {
+            } else if (this->mouse_state == MouseState::LINE_MODE && this->mouse_down == true && event.button.button == SDL_BUTTON_LEFT){
+
+            }
+             else */if (event.button.button == SDL_BUTTON_RIGHT && mouse_down == false) {
                 this->mouse_state = MouseState::NORMAL_MODE;
                 this->notification_manager->push({
                         "Normal mode",
