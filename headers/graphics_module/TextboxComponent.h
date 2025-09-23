@@ -21,7 +21,7 @@ class TextboxComponent {
         void render(SDL_Surface* targetSurface);
 
         void setText(const std::string& t) { text = t; }
-        const std::string& getText() const { return text; }
+        const std::string& get_text() const { return text; }
         void setActive(bool a) { active = a; }
         bool get_active();
 };

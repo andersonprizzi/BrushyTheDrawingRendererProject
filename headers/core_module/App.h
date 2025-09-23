@@ -8,6 +8,10 @@ class App;
 class ButtonComponent;
 class TextboxComponent;
 class NotificationManager;
+class House;
+class Tree;
+class Shape;
+class Sun;
 
 // C++ standard library.
 #include <string>
@@ -30,10 +34,6 @@ class NotificationManager;
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-class House;
-class Tree;
-class Shape;
-class Sun;
 // Header files.
 #include "Colors.h"
 #include "Utils.h"
@@ -77,51 +77,70 @@ class App {
     private:
         // Application attributes.
         SDL_Window* window;
-        SDL_Surface* surface;
+        SDL_Surface* window_surface;
         SDL_Surface* drawing_surface;
         bool running;
         int screen_width;
         int screen_height;
         int window_width;
         int window_height;
-
         std::string window_title;
-        AppState app_state;
         MouseState mouse_state = MouseState::NORMAL_MODE;
         NotificationManager *notification_manager;
 
-        // Graphical interface attributes.
+        // General graphical interface methods and attributes.
         static float new_drawing_button_relative_x_percent;
         static float new_drawing_button_relative_y_percent;
         static float load_file_button_relative_x_percent;
         static int default_button_height;
+        static int secondary_button_width;
+        static int app_bar_height;
+
+        // Screen state attributes and methods.
+        AppState app_state;
+        void change_screen_state(AppState new_state);
+        void load_menu_screen();
+        void unload_menu_screen();
+        void load_new_project_screen();
+        void unload_new_project_screen();
+        void load_rendering_screen();
+        void unload_rendering_screen();
+
+        // Screen rendering attributes and methods.
+        void render_menu_screen();
+        void render_new_project_screen();
+        void render_rendering_screen();
+
+        // Graphical interface components attributes: MENU_SCREEN.
         ImageComponent* app_icon_image;
         ButtonComponent* new_drawing_button;
         ButtonComponent* load_project_button;
-        ButtonComponent* create_project_button;
-        ButtonComponent* back_menu_button;
-        TextboxComponent* width_textbox;
-        TextboxComponent* height_textbox;
         SDL_Surface* text_title_surface;
         SDL_Surface* text_enter_height_surface;
         SDL_Surface* text_enter_width_surface;
         SDL_Rect text_rect;
 
-        //======================================
+        // Graphical interface components attributes: NEW_PROJECT_SCREEN.
+        ButtonComponent* create_project_button;
+        ButtonComponent* back_menu_button;
+        TextboxComponent* width_textbox;
+        TextboxComponent* height_textbox;
+        AppBar* app_bar_project_screen;
+
         //PARADAS PARA GUI DO PAINT 2
         std::list<Point> points;
         std::list<Point> eraser_points;
         std::list<Point> fill_points;
         std::list<std::array<Point,2>> lines;
-
         std::vector<std::unique_ptr<Shape> > shapes;
 
-        //PARA DRAG AND DROP
+        // Drag and drop functionality attributes.
         bool mouse_down = false; //Informa se o mouse foi baixado dentro da área de desenho (se desenho foi iniciado, basicamente)
         bool temporary_in_list = false;
         Point temporary_dragging_point = Point(0,0);
         Point initial_point = Point(0,0);
-        //BOTÕES
+
+        // Graphical interface components attributes: RENDERING_SCREEN.
         ButtonComponent* eraser_button;
         ButtonComponent* pencil_button;
         ButtonComponent* bucket_button;
@@ -130,9 +149,7 @@ class App {
         ButtonComponent* tree_button;
         ButtonComponent* fence_button;
         ButtonComponent* sun_button;
-
-        Uint32 primary_colors[4]; //Pensei pra colocar tuas cores e tal, mas daí tu se vira pra implementar kkk boa sorte
-        //======================================
+        AppBar* app_bar_rendering_screen;
 
     public:
         App(const std::string& title, float width_percent, float height_percent);
@@ -146,8 +163,6 @@ class App {
         void update_screen();
         int get_window_width();
         int get_window_height();
-        /*static int get_universe_width();
-        static int get_universe_height();*/
         int get_screen_width();
         int get_screen_height();
         SDL_Surface* get_surface();

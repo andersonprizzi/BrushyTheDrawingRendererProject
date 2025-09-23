@@ -8,7 +8,7 @@ AppBar::AppBar(int width, int height, const std::string& title, TTF_Font* font)
       marginLeft(20),
       font(font) {}
 
-void AppBar::setBackgroundColor(SDL_Color color) {
+void AppBar::set_background_color(SDL_Color color) {
     bgColor = color;
 }
 
@@ -20,11 +20,11 @@ void AppBar::setMarginLeft(int margin) {
     marginLeft = margin;
 }
 
-void AppBar::setTitle(const std::string& newTitle) {
+void AppBar::set_title(const std::string& newTitle) {
     title = newTitle;
 }
 
-void AppBar::setSize(int width, int height) {
+void AppBar::set_size(int width, int height) {
     rect.w = width;
     rect.h = height;
 }
