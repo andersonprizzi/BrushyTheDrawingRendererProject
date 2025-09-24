@@ -47,7 +47,6 @@
 		</Compiler>
 		<Unit filename="headers/core_module/App.h" />
 		<Unit filename="headers/core_module/Colors.h" />
-		<Unit filename="headers/core_module/Config.h" />
 		<Unit filename="headers/core_module/ErrorHandler.h" />
 		<Unit filename="headers/core_module/FileManager.h" />
 		<Unit filename="headers/core_module/FontManager.h" />

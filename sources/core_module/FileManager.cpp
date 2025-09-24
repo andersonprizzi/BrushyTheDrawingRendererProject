@@ -1,46 +1,44 @@
 #include "FileManager.h"
-
-// Includes necessários para a implementação
+#include "Shape.h"
+#include "House.h"
+#include "Tree.h"
+#include "Fence.h"
+#include "Sun.h"
+#include "Colors.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <map>
+#include <cctype>   // Para tolower
+#include <algorithm>// Para std::for_each
 
-#include "App.h"
+// --- FUNÇÕES AUXILIARES ---
 
-// Converte um nome de cor (string) para um valor Uint32 usando sua classe Colors
-static Uint32 color_from_string(const std::string& color_name, SDL_Surface* surface) {
-    // Converte o nome para minúsculas para a comparação ser case-insensitive
-    std::string lower_name = color_name;
-    for (char &c : lower_name) {
-        c = tolower(c);
-    }
-
-    // Mapeamento simples de nomes para as cores da sua classe
-    if (lower_name == "vermelho") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "red");
-    if (lower_name == "verde") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "green");
-    if (lower_name == "azul") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "blue");
-    if (lower_name == "amarelo" || lower_name == "amarela") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "yellow");
-    if (lower_name == "marrom") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "brown");
-    if (lower_name == "lima") return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "lime");
-
-    // Retorna preto como padrão se a cor não for encontrada
-    return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
-}
-
-// Divide uma string em um vetor de substrings com base em um delimitador
+// Divide uma string com base em um delimitador
 static std::vector<std::string> split(const std::string& s, char delimiter) {
     std::vector<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(s);
     while (std::getline(tokenStream, token, delimiter)) {
-        tokens.push_back(token);
+        if (!token.empty() && token.find_first_not_of(" \t\r\n") != std::string::npos) {
+            tokens.push_back(token);
+        }
     }
     return tokens;
 }
 
-// Função principal que cria um Shape com base nos atributos lidos
+// Converte um nome de cor para Uint32 usando seu sistema.
+static Uint32 color_from_string(const std::string& color_name, SDL_Surface* surface) {
+    std::string lower_name = color_name;
+    std::for_each(lower_name.begin(), lower_name.end(), [](char & c) {
+        c = ::tolower(c);
+    });
+    // Esta função auxiliar simplifica a chamada.
+    return Colors::get_color(surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, lower_name);
+}
+
+// Cria um Shape com base nos atributos lidos do arquivo
 static void create_and_add_shape(
     const std::string& shape_type,
     const std::map<std::string, std::vector<std::string>>& attributes,
@@ -48,101 +46,119 @@ static void create_and_add_shape(
     SDL_Surface* surface)
 {
     try {
-        int loc_x = std::stoi(attributes.at("Localizacao")[0]);
-        int loc_y = std::stoi(attributes.at("Localizacao")[1]);
-        int altura = std::stoi(attributes.at("Altura")[0]);
-        int largura = std::stoi(attributes.at("Largura")[0]);
+        // Atributos comuns
+        int loc_x = std::stoi(attributes.at("Localizacao").at(0));
+        int loc_y = std::stoi(attributes.at("Localizacao").at(1));
+        int altura = std::stoi(attributes.at("Altura").at(0));
+        int largura = std::stoi(attributes.at("Largura").at(0));
+
+        // Atributo opcional: Inclinacao (padrão é 0)
+        float inclinacao = 0.0f;
+        auto it_inclinacao = attributes.find("Inclinacao");
+        if (it_inclinacao != attributes.end()) {
+            inclinacao = std::stof(it_inclinacao->second.at(0));
+        }
+
+        std::unique_ptr<Shape> new_shape = nullptr;
 
         if (shape_type == "Casa") {
-            Uint32 cor_parede = color_from_string(attributes.at("CorParede")[0], surface);
-            Uint32 cor_telhado = color_from_string(attributes.at("CorTelhado")[0], surface);
-            Uint32 cor_porta = color_from_string(attributes.at("CorPorta")[0], surface);
-            shapes.push_back(std::make_unique<House>(largura, altura, loc_x, loc_y, cor_parede, cor_porta, cor_telhado));
-
+            new_shape = std::make_unique<House>(largura, altura, loc_x, loc_y,
+                color_from_string(attributes.at("CorParede").at(0), surface),
+                color_from_string(attributes.at("CorPorta").at(0), surface),
+                color_from_string(attributes.at("CorTelhado").at(0), surface)
+            );
         } else if (shape_type == "Arvore") {
-            Uint32 cor_tronco = color_from_string(attributes.at("CorTronco")[0], surface);
-            Uint32 cor_folhas = color_from_string(attributes.at("CorFolhas")[0], surface);
-            // Árvore tem uma cor de maçã opcional, vamos tratar isso
-            Uint32 cor_maca = color_from_string("red", surface); // Padrão
-            shapes.push_back(std::make_unique<Tree>(largura, altura, loc_x, loc_y, cor_tronco, cor_folhas, cor_maca));
-
-        } else if (shape_type == "Cerca") {
-            Uint32 cor_cerca = color_from_string(attributes.at("Cor")[0], surface);
-            // O construtor da Cerca espera duas cores, vamos passar a mesma por enquanto
-            shapes.push_back(std::make_unique<Fence>(largura, altura, loc_x, loc_y, cor_cerca, cor_cerca));
-
-        } else if (shape_type == "Sol") {
-            // O construtor do Sol espera duas cores, vamos improvisar com base no CSV
-            Uint32 cor_sol = color_from_string("yellow", surface); // Cor principal
-            Uint32 cor_raios = color_from_string("orange", surface); // Cor secundária
-            shapes.push_back(std::make_unique<Sun>(largura, altura, loc_x, loc_y, cor_sol, cor_raios));
+            Uint32 cor_frutos = color_from_string("red", surface); // Valor padrão
+            new_shape = std::make_unique<Tree>(largura, altura, loc_x, loc_y,
+                color_from_string(attributes.at("CorTronco").at(0), surface),
+                color_from_string(attributes.at("CorFolhas").at(0), surface),
+                cor_frutos
+            );
+        } else if (shape_type == "Cerca" || shape_type == "Sol") {
+            // Lógica unificada para Cerca e Sol que usam um atributo "Cor" simples
+            Uint32 cor_unica = color_from_string(attributes.at("Cor").at(0), surface);
+            if (shape_type == "Cerca") {
+                new_shape = std::make_unique<Fence>(largura, altura, loc_x, loc_y, cor_unica, cor_unica);
+            } else { // Sol
+                new_shape = std::make_unique<Sun>(largura, altura, loc_x, loc_y, cor_unica, cor_unica);
+            }
         }
-    } catch (const std::out_of_range& e) {
-        std::cerr << "Erro: Atributo faltando para o shape do tipo '" << shape_type << "'. Detalhes: " << e.what() << std::endl;
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Erro: Valor inválido encontrado para atributo do shape '" << shape_type << "'. Detalhes: " << e.what() << std::endl;
+
+        // Se a forma foi criada com sucesso, aplica a inclinação e a adiciona ao vetor
+        if (new_shape) {
+            if (inclinacao != 0.0f) {
+                new_shape->rotate_figure(inclinacao);
+            }
+            shapes.push_back(std::move(new_shape));
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << "Erro ao processar o shape '" << shape_type << "'. Verifique os atributos no arquivo. Detalhe: " << e.what() << std::endl;
     }
 }
 
 
-// --- Implementação do Método Principal ---
-
-bool FileManager::load_scene(const std::string& file_path, SDL_Surface* target_surface, std::vector<std::unique_ptr<Shape>>& shapes) {
+// --- IMPLEMENTAÇÃO DO MÉTODO PRINCIPAL ---
+bool FileManager::load_scene(
+    const std::string& file_path,
+    SDL_Surface* target_surface,
+    std::vector<std::unique_ptr<Shape>>& shapes,
+    int* out_width,
+    int* out_height,
+    int* out_universe_w,
+    int* out_universe_h,
+    Uint32* out_bg_color)
+{
     std::ifstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Erro: Nao foi possivel abrir o arquivo: " << file_path << std::endl;
         return false;
     }
 
-    // Limpa o vetor de shapes antes de carregar os novos
     shapes.clear();
-
     std::string line;
-    std::string current_shape_type = "";
+    std::string current_block_type = ""; // Pode ser "Tela" ou um tipo de Shape
     std::map<std::string, std::vector<std::string>> current_attributes;
 
     while (std::getline(file, line)) {
-        // Ignora linhas vazias
-        if (line.empty() || line.find_first_not_of(" \t\r\n") == std::string::npos) {
-            continue;
-        }
+        if (line.empty() || line.rfind("//", 0) == 0) continue;
 
-        // Remove o último caractere se for ';' para evitar tokens vazios
-        if (!line.empty() && line.back() == ';') {
-            line.pop_back();
-        }
+        auto tokens = split(line, ';');
+        if (tokens.empty()) continue;
 
-        std::vector<std::string> tokens = split(line, ';');
-        if (tokens.empty()) {
-            continue;
-        }
+        const std::string& key = tokens[0];
 
-        std::string key = tokens[0];
-
-        // Verifica se é uma declaração de um novo Shape
-        if (key == "Casa" || key == "Arvore" || key == "Cerca" || key == "Sol") {
-            // Se já estávamos processando um shape, vamos criá-lo agora.
-            if (!current_shape_type.empty()) {
-                create_and_add_shape(current_shape_type, current_attributes, shapes, target_surface);
+        // Verifica se é uma palavra-chave de bloco (Tela, Casa, Arvore, etc.)
+        if (key == "Tela" || key == "Casa" || key == "Arvore" || key == "Cerca" || key == "Sol") {
+            // Se já estávamos lendo um bloco, processa ele antes de começar o novo.
+            if (!current_block_type.empty() && current_block_type != "Tela") {
+                create_and_add_shape(current_block_type, current_attributes, shapes, target_surface);
             }
-
-            // Inicia o processamento do novo shape
-            current_shape_type = key;
+            // Inicia o novo bloco
+            current_block_type = key;
             current_attributes.clear();
-
-        } else if (key != "Tela" && tokens.size() > 1) {
-            // Se for um atributo, armazena no mapa do shape atual
-            if (!current_shape_type.empty()) {
-                 // Remove o primeiro token (a chave) para guardar apenas os valores
+        }
+        // Se não for uma palavra-chave de bloco, é um atributo
+        else if (!current_block_type.empty() && tokens.size() > 1) {
+            if (current_block_type == "Tela") {
+                // Processa os atributos da Tela imediatamente
+                if (key == "Resolucao" && tokens.size() >= 3) {
+                    *out_width = std::stoi(tokens[1]); *out_height = std::stoi(tokens[2]);
+                } else if (key == "Metros" && tokens.size() >= 3) {
+                    *out_universe_w = std::stoi(tokens[1]); *out_universe_h = std::stoi(tokens[2]);
+                } else if (key == "Cor" && tokens.size() >= 2) {
+                    *out_bg_color = color_from_string(tokens[1], target_surface);
+                }
+            } else {
+                // Armazena o atributo para o Shape atual
                 current_attributes[key] = std::vector<std::string>(tokens.begin() + 1, tokens.end());
             }
         }
-        // Ignora a linha "Tela" e seus atributos por enquanto
     }
 
-    // Adiciona o último shape do arquivo (que não é seguido por outro)
-    if (!current_shape_type.empty()) {
-        create_and_add_shape(current_shape_type, current_attributes, shapes, target_surface);
+    // Adiciona o último shape do arquivo.
+    if (!current_block_type.empty() && current_block_type != "Tela") {
+        create_and_add_shape(current_block_type, current_attributes, shapes, target_surface);
     }
 
     file.close();

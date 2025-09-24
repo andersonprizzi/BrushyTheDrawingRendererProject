@@ -10,13 +10,13 @@ Point::Point(double new_x = 0, double new_y = 0) {
 
 
 // METHOD IMPLEMENTATION
-double Point::get_x() {
+double Point::get_x() const {
     return x;
 };
 
 
 // METHOD IMPLEMENTATION
-double Point::get_y() {
+double Point::get_y() const {
     return y;
 }
 

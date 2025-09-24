@@ -101,7 +101,12 @@ Uint32 Primitives::get_pixel(SDL_Surface* surface, int x, int y) {
  * @param intensity Float intensity (0.0–1.0) of coverage.
  */
 void Primitives::blend_pixel(SDL_Surface* surface, int px, int py, SDL_Color line_color, float intensity) {
-    if (!Utils::verify_limits(surface, px, py)) return;
+    //if (!Utils::verify_limits(surface, px, py)) return;
+
+    if (px >= surface->w || py >= surface->h || px < 0 || py < 0) {
+        // ErrorHandler::log_error("Point out of bounds.");
+        return;
+    }
 
     Uint32 bgPixel = Primitives::get_pixel(surface, px, py);
     SDL_Color bgColor;
@@ -313,6 +318,8 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
 }
 
 
+
+
 // METHOD IMPLEMENTATION
 /**
  * @brief Draws a cubic Bézier curve on an SDL_Surface with optional anti-aliasing.
@@ -338,8 +345,6 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
  *       based on the maximum delta between the first and last control points
  *       to ensure smooth rendering even for steep curves.
  */
-
-/*
 void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
     if (Utils::verify_limits(surface, x0, y0) == 0) return;
     if (Utils::verify_limits(surface, x1, y1) == 0) return;
@@ -371,94 +376,12 @@ void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1,
             Primitives::set_pixel(surface, x_int, y_int, color);
         }
     }
-}*/
-
-
-
-void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
-    // [REMOVIDO] A verificação inicial apenas nos pontos de controle foi removida.
-    // Ela é insuficiente, pois a curva pode sair dos limites mesmo que os
-    // controles estejam dentro da tela. A verificação será feita ponto a ponto dentro do loop.
-
-    if (!surface) {
-        return;
-    }
-
-    // Pré-calcula a largura e altura para evitar acessos repetidos a surface->w/h
-    const int surface_w = surface->w;
-    const int surface_h = surface->h;
-
-    // Aumenta o número de passos para garantir uma curva mais suave e conectada
-    const int steps = std::max(abs(x3 - x0), abs(y3 - y0)) * 2;
-    if (steps == 0) { // Se for um ponto único
-        if (x0 >= 0 && x0 < surface_w && y0 >= 0 && y0 < surface_h) {
-            Primitives::set_pixel(surface, x0, y0, color);
-        }
-        return;
-    }
-
-    SDL_Color sdl_color;
-    if (anti_aliasing) {
-        sdl_color = Colors::uint32_to_sdlcolor(surface, color);
-    }
-
-    for (int i = 0; i <= steps; i++) {
-        double u = static_cast<double>(i) / steps;
-
-        // [OTIMIZAÇÃO] Evita múltiplos cálculos de pow()
-        double u1 = 1.0 - u;
-        double u1_pow3 = u1 * u1 * u1;
-        double u_pow3 = u * u * u;
-        double u1_pow2_u_3 = 3.0 * u * u1 * u1;
-        double u_pow2_u1_3 = 3.0 * u * u * u1;
-
-        double xu = u1_pow3 * x0 + u1_pow2_u_3 * x1 + u_pow2_u1_3 * x2 + u_pow3 * x3;
-        double yu = u1_pow3 * y0 + u1_pow2_u_3 * y1 + u_pow2_u1_3 * y2 + u_pow3 * y3;
-
-        int x_int = static_cast<int>(round(xu));
-        int y_int = static_cast<int>(round(yu));
-
-        if (anti_aliasing) {
-            float fx = static_cast<float>(xu - floor(xu));
-            float fy = static_cast<float>(yu - floor(yu));
-
-            // [SEGURANÇA] Verifica cada um dos 4 pixels antes de tentar desenhar
-            int p1x = static_cast<int>(floor(xu)), p1y = static_cast<int>(floor(yu));
-            int p2x = p1x + 1, p2y = p1y;
-            int p3x = p1x, p3y = p1y + 1;
-            int p4x = p1x + 1, p4y = p1y + 1;
-
-            if (p1x >= 0 && p1x < surface_w && p1y >= 0 && p1y < surface_h)
-                Primitives::blend_pixel(surface, p1x, p1y, sdl_color, (1.0f - fx) * (1.0f - fy));
-
-            if (p2x >= 0 && p2x < surface_w && p2y >= 0 && p2y < surface_h)
-                Primitives::blend_pixel(surface, p2x, p2y, sdl_color, fx * (1.0f - fy));
-
-            if (p3x >= 0 && p3x < surface_w && p3y >= 0 && p3y < surface_h)
-                Primitives::blend_pixel(surface, p3x, p3y, sdl_color, (1.0f - fx) * fy);
-
-            if (p4x >= 0 && p4x < surface_w && p4y >= 0 && p4y < surface_h)
-                Primitives::blend_pixel(surface, p4x, p4y, sdl_color, fx * fy);
-
-        } else {
-            // [SEGURANÇA] Só desenha o pixel se ele estiver dentro dos limites da tela
-            if (x_int >= 0 && x_int < surface_w && y_int >= 0 && y_int < surface_h) {
-                Primitives::set_pixel(surface, x_int, y_int, color);
-            }
-        }
-    }
 }
-
-
 
 void Primitives::draw_flat_curve(SDL_Surface* surface,
                             int x0, int y0, int x1, int y1,
                             int x2, int y2, int x3, int y3,
                             Uint32 color, bool anti_aliasing) {
-    printf("ENTROU NESTA BOMBA\n");
-    return;
-
-
     if (!surface) return;
     // Se preferir manter o guard original, ok; mas remover os 4 checks evita "sumir" a curva
     // caso algum controle fique fora, já que vamos desenhar com clipping do draw_line.
@@ -532,15 +455,7 @@ void Primitives::draw_flat_curve(SDL_Surface* surface,
     recurse(P0, P1, P2, P3, 0);
 }
 
-
-
-
-
 void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
-    Primitives::draw_bezier_curve(surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
-    return;
-
-    /*
     // "Flatness" da cúbica: maior distância dos pontos de controle internos
     // à reta que liga as extremidades (em pixels).
     double d1 = Utils::perp_dist((double)x1, (double)y1, (double)x0, (double)y0, (double)x3, (double)y3);
@@ -567,7 +482,6 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
         // curva acentuada → robusta (subdivisão/adaptativa em linhas conectadas)
         Primitives::draw_flat_curve  (surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
     }
-    */
 }
 
 
@@ -948,31 +862,53 @@ void Primitives::flood_fill(SDL_Surface* surface, int x, int y, Uint32 fill_colo
 
 
 // METHOD IMPLEMENTATION
-void Primitives::draw_rotated_ellipse(SDL_Surface* surface,int cx, int cy, int rx, int ry,float angle_rad, Uint32 color, bool filled)
+void Primitives::draw_rotated_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int ry, float angle_rad, Uint32 color, bool filled)
 {
     if (!surface) return;
+    if (rx <= 0 || ry <= 0) return;
+
     SDL_Color col = Colors::uint32_to_sdlcolor(surface, color);
 
-    float c = cosf(angle_rad), s = sinf(angle_rad);
+    float c = cosf(angle_rad);
+    float s = sinf(angle_rad);
     int margin = (rx > ry ? rx : ry) + 2;
-    int samples = 4; // 4x4
+    int samples = 4;
 
-    for (int y = cy - margin; y <= cy + margin; ++y) {
-        for (int x = cx - margin; x <= cx + margin; ++x) {
+    // [CORREÇÃO] Calcula os limites da iteração (bounding box na tela)
+    int x_start = cx - margin;
+    int x_end = cx + margin;
+    int y_start = cy - margin;
+    int y_end = cy + margin;
+
+    // [CORREÇÃO] Restringe (clamping) os limites para ficarem DENTRO da tela.
+    // Isso evita loops gigantes e garante que 'x' e 'y' sempre serão válidos.
+    x_start = std::max(0, x_start);
+    x_end = std::min(surface->w - 1, x_end);
+    y_start = std::max(0, y_start);
+    y_end = std::min(surface->h - 1, y_end);
+
+    // O loop agora itera SOMENTE sobre os pixels potencialmente visíveis.
+    for (int y = y_start; y <= y_end; ++y) {
+        for (int x = x_start; x <= x_end; ++x) {
             int inside = 0;
             for (int sy = 0; sy < samples; ++sy) {
                 for (int sx = 0; sx < samples; ++sx) {
-                    float dx = (x + (sx + 0.5f)/samples) - cx;
-                    float dy = (y + (sy + 0.5f)/samples) - cy;
-                    // leva p/ o frame da elipse (rotação inversa)
-                    float u =  c*dx + s*dy;
-                    float v = -s*dx + c*dy;
-                    float val = (u*u)/(rx*rx) + (v*v)/(ry*ry);
-                    if (filled ? (val <= 1.0f) : (fabsf(val - 1.0f) <= 0.07f)) inside++;
+                    float dx = (x + (sx + 0.5f) / samples) - cx;
+                    float dy = (y + (sy + 0.5f) / samples) - cy;
+                    float u = c * dx + s * dy;
+                    float v = -s * dx + c * dy;
+                    float val = (u * u) / (rx * rx) + (v * v) / (ry * ry);
+                    if (filled ? (val <= 1.0f) : (fabsf(val - 1.0f) <= 0.07f)) {
+                        inside++;
+                    }
                 }
             }
-            float cov = (float)inside / (samples*samples);
-            if (cov > 0.0f) Primitives::blend_pixel(surface, x, y, col, cov);
+            float cov = (float)inside / (samples * samples);
+            // A chamada a blend_pixel agora é inerentemente segura, pois x e y
+            // estão garantidos dentro dos limites da tela pelo loop.
+            if (cov > 0.0f) {
+                Primitives::blend_pixel(surface, x, y, col, cov);
+            }
         }
     }
 }

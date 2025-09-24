@@ -1,7 +1,7 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include "App.h"
+#include "Point.h"
 
 class Shape {
     private:

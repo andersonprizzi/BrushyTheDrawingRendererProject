@@ -38,6 +38,8 @@ class ImageComponent {
 
         int getX() const { return x; }
         int getY() const { return y; }
+        void set_x(int new_x) {this->x = new_x;}
+        void set_y(int new_y) {this->y = new_y;}
 };
 
 #endif

@@ -18,7 +18,9 @@ const Colors::ColorItem Colors::drawing_colors_table[] = {
     {"blue",    {0, 0, 255}},
     {"navy",    {0, 0, 128}},
     {"fuchsia", {255, 0, 255}},
-    {"purple",  {128, 0, 128}}
+    {"purple",  {128, 0, 128}},
+    {"brown",   {165, 42,  42}},
+    {"orange",  {255, 165, 0}}
 };
 
 
@@ -27,6 +29,7 @@ const Colors::ColorItem Colors::interface_colors_table[] = {
     {"primary_background_button",     {95, 95, 95}},
     {"secondary_background_button",   {0, 89, 173}},
     {"button_text_color",             {255, 255, 255}},
+    {"main_background_window",        {255, 255, 255}},
     {"primary_background_window",     {240, 240, 240}},
 };
 

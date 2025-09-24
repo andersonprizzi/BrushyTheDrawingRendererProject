@@ -1,3 +1,4 @@
+/*
 #include "Circle.h"
 
 Circle::Circle(int cx, int cy, int radius, bool filled, bool anti_aliasing, Uint32 color) {
@@ -12,3 +13,4 @@ Circle::Circle(int cx, int cy, int radius, bool filled, bool anti_aliasing, Uint
 void Circle::draw(SDL_Surface* surface) {
     if (!surface) return;
 }
+*/

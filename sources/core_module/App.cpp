@@ -3,14 +3,17 @@
 
 // STATIC ATTRIBUTES INITIALIZATION
 float App::new_drawing_button_relative_x_percent = 0.50f;       // Posição horizontal relativa
-float App::new_drawing_button_relative_y_percent = 0.70f;       // Posição vertical relativa
+float App::new_drawing_button_relative_y_percent = 0.73f;       // Posição vertical relativa // Para mover os TODOS os elementos da tela inicial para cima e para baixo, basta modificar este atributo.
 float App::load_file_button_relative_x_percent = 0.50f;         // Posição horizontal relativa
-int App::default_button_height = 45;
-int App::secondary_button_width = 300;
+int App::primary_button_height = 45;
+int App::primary_button_width = 300;
 int App::app_bar_height = 50;
+int App::default_margin = 30;
+int App::main_image_size = 256;
+int App::bottom_image_margin = 15;
 int App::universe_width = 40;
 int App::universe_height = 30;
-int App::default_margin = 30;
+
 
 
 // CONSTRUCTOR IMPLEMENTATION
@@ -82,6 +85,8 @@ App::App(const std::string& title, float width_percent, float height_percent) {
         SDL_SetWindowIcon(this->window, icon);
         SDL_FreeSurface(icon);
     }
+
+    this->background_drawing_color = Colors::rgb_to_uint32(this->drawing_surface, 255, 255, 255);
 }
 
 
@@ -90,180 +95,25 @@ void App::run() {
     this->running = true;
     this->load_menu_screen();
 
-    // Initializing screen components.
-    int btn_w = 300; // REMOVER
-    int icon_x = (window_width - 256) / 2;
-    int icon_y = 10;
-    int icon_w = 256;
-    int icon_h = 256;
-    int textbox_w = 300;
-    int textbox_h = 40;
-    int textbox_x = 50;
-    int textbox_y = 100;
-
-    // Renderiza o texto para uma surface
-    SDL_Color textColor = {0, 0, 0}; // preto
-    text_title_surface = TTF_RenderText_Blended(FontManager::libertinus_regular_36, "BRUSHY", textColor);
+    // Renderiza o texto para uma surface.
+    SDL_Color textColor = {0, 0, 0};
     text_enter_height_surface = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter height:", textColor);
     text_enter_width_surface = TTF_RenderText_Blended(FontManager::roboto_semibold_20, "Enter width:", textColor);
-
-    if (!text_title_surface || !text_enter_width_surface || !text_enter_height_surface) {
-        ErrorHandler::fatal_error("There was a problem rendering text: %s.\n", TTF_GetError());
-    }
-
-
-    // Creating image components.
-    this->app_icon_image = new ImageComponent(
-        "assets/Icon_256.bmp",
-        icon_x,
-        icon_y
-    );
-
-
-    // Creating button components.
-    this->create_project_button = new ButtonComponent(
-        static_cast<int>(window_width * this->load_file_button_relative_x_percent - btn_w / 2),
-        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2),
-        btn_w,
-        this->default_button_height,
-        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "secondary_background_button"),
-        "Create project",
-        FontManager::roboto_semibold_20,
-        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
-    );
-
-    this->back_menu_button = new ButtonComponent(
-        static_cast<int>(window_width * this->load_file_button_relative_x_percent - btn_w / 2),
-        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2) + this->default_button_height + 15,
-        btn_w,
-        this->default_button_height,
-        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
-        "Back to menu",
-        FontManager::roboto_semibold_20,
-        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
-    );
-
-    // Creating textbox components.
-    width_textbox = new TextboxComponent(
-        static_cast<int>(window_width * this->load_file_button_relative_x_percent - textbox_w / 2),
-        textbox_y,
-        textbox_w,
-        textbox_h,
-        FontManager::roboto_semibold_20,
-        true
-    );
-
-    height_textbox = new TextboxComponent(
-        static_cast<int>(window_width * this->load_file_button_relative_x_percent - textbox_w / 2),
-        textbox_y + textbox_h + 60,
-        textbox_w, textbox_h,
-        FontManager::roboto_semibold_20,
-        true
-    );
-
-    Uint32 red = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "red");
-    Uint32 green = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "green");
-    Uint32 blue = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "blue");
-    Uint32 black = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
 
     // Execution loop.
     while (running) {
         if (this->app_state == AppState::MENU_SCREEN) {
             this->render_menu_screen();
-            clear_screen(Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "white"));
-            new_drawing_button->draw(window_surface);
-            load_project_button->draw(window_surface);
-            app_icon_image->draw(window_surface);
-
-            text_rect.w = text_title_surface->w;
-            text_rect.h = text_title_surface->h;
-            text_rect.x = (window_width - text_rect.w) / 2;
-            text_rect.y = icon_y + icon_h + 10;
-            SDL_BlitSurface(text_title_surface, NULL, window_surface, &text_rect);
 
         } else if (this->app_state == AppState::NEW_PROJECT_SCREEN) {
             this->render_new_project_screen();
 
-            // Enables text input only if any textbox is active.
-            if ((width_textbox && width_textbox->get_active()) || (height_textbox && height_textbox->get_active())) {
-                SDL_StartTextInput();
-            } else {
-                SDL_StopTextInput();
-            }
-
-            // Clears the screen with the default background color.
-            clear_screen(Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_window"));
-
-            // Draw the app bar.
-            app_bar_project_screen->draw(this->window_surface);
-
-            // Draws textbox captions.
-            if (text_enter_width_surface && text_enter_height_surface) {
-                text_rect.w = text_enter_width_surface->w;
-                text_rect.h = text_enter_width_surface->h;
-                text_rect.x = (window_width - text_rect.w) / 2;
-                text_rect.y = width_textbox->rect.y - 30;
-                SDL_BlitSurface(text_enter_width_surface, NULL, window_surface, &text_rect);
-
-                text_rect.w = text_enter_height_surface->w;
-                text_rect.h = text_enter_height_surface->h;
-                text_rect.x = (window_width - text_rect.w) / 2;
-                text_rect.y = height_textbox->rect.y - 30;
-                SDL_BlitSurface(text_enter_height_surface, NULL, window_surface, &text_rect);
-            }
-
-            if (width_textbox) {
-                width_textbox->render(window_surface);
-            }
-
-            if (height_textbox) {
-                height_textbox->render(window_surface);
-            }
-
-            create_project_button->draw(window_surface);
-            back_menu_button->draw(window_surface);
-
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
             this->render_rendering_screen();
-
-            //casinha.translate(-10.0, 10.0);
-            //Point centro = Point(casinha.x_origin + 0.5 * casinha.width,casinha.y_origin + 0.5 * casinha.height);
-            //casinha.rotate_figure(drawing_surface, 45.0, centro);
-            //casinha.rotate_figure(45.0);
-
-
-            /*
-            Sun sol = Sun(20, 20, 50, 35, green, red);
-            //sol.scale(3, 1);
-            sol.rotate_figure(15);
-            sol.draw(drawing_surface);
-
-            Fence cerca2 = Fence(20, 20, 30, 35, black, green);
-            cerca2.rotate_figure(50);
-            cerca2.scale(1.1, 0.5);
-            cerca2.translate(-15, 13);
-            cerca2.draw(drawing_surface);
-
-            //House casinha = House(30,20,50,35,red,blue,green);
-            //casinha.draw(drawing_surface);
-
-            //casinha.change_origin(Point(50, 10));
-
-            //casinha.translate(-10.0, 10.0);
-            //Point centro = Point(casinha.x_origin + 0.5 * casinha.width,casinha.y_origin + 0.5 * casinha.height);
-            //casinha.rotate_figure(drawing_surface, 45.0, centro);
-            //casinha.rotate_figure(45.0);
-            //casinha.draw(drawing_surface);
-
-            //casinha.rotate_figure(45.0);
-            //casinha.scale(1.7, 0.5);
-            //casinha.draw(drawing_surface);
-            */
         }
 
         this->notification_manager->update();
         this->notification_manager->draw(this->window_surface);
-
         this->handle_events();
         this->update_screen();
     }
@@ -286,6 +136,7 @@ void App::close(int exit_code) {
     SDL_Quit();
     exit(exit_code);
 }
+
 
 bool inside_rect(int mx, int my, SDL_Rect dst_rect){
     if (mx >= dst_rect.x && mx < dst_rect.x + dst_rect.w && my >= dst_rect.y && my < dst_rect.y + dst_rect.h) return true;
@@ -327,7 +178,7 @@ void App::handle_events() {
             if (this->load_project_button) {
                 this->load_project_button->set_position(
                     static_cast<int>(window_width * this->load_file_button_relative_x_percent - load_project_button->w / 2),
-                    static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2) + this->default_button_height + 15
+                    static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->primary_button_height / 2) + this->primary_button_height + 15
                 );
             }
 
@@ -338,10 +189,20 @@ void App::handle_events() {
             if (this->app_bar_rendering_screen) {
                 this->app_bar_rendering_screen->set_size(this->window_width, App::app_bar_height);
             }
+
+            if (this->app_state == AppState::MENU_SCREEN) {
+                text_rect.w = text_title_surface->w;
+                text_rect.h = text_title_surface->h;
+                text_rect.x = (window_width - text_rect.w) / 2;
+                text_rect.y = this->new_drawing_button->y - text_rect.h - 30;
+                this->app_icon_image->set_x((window_width - App::main_image_size) / 2);
+                this->app_icon_image->set_y(this->text_rect.y - App::main_image_size - App::bottom_image_margin);
+            }
         }
 
         // Processes mouse click events.
         if (event.type == SDL_MOUSEBUTTONDOWN) {
+            //printf("event.type == SDL_MOUSEBUTTONDOWN\n");
             int mx = event.button.x;
             int my = event.button.y;
 
@@ -363,10 +224,27 @@ void App::handle_events() {
 
             // Se o usuário clicar em "Open project file"
             } else if (this->app_state == AppState::MENU_SCREEN && load_project_button->is_clicked(mx, my)) {
-                if (FileManager::load_scene("ExemploTeste.csv", this->window_surface, this->shapes)) {
-                    this->recreate_drawing_surface(1024, 530);
-                    SDL_SetWindowSize(this->window, 1024 + 2 * App::default_margin, 530 + 2 * App::default_margin + App::app_bar_height);
-                    SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+                int loaded_width = 0, loaded_height = 0;
+                int universe_w = 0, universe_h = 0;
+                Uint32 background_color = 0;
+
+                if (FileManager::load_scene("ExemploCorrigido.csv", this->window_surface, this->shapes,
+                                            &loaded_width, &loaded_height,
+                                            &universe_w, &universe_h,
+                                            &background_color))
+                {
+                    if (universe_w > 0 && universe_h > 0) {
+                        App::universe_width = universe_w;
+                        App::universe_height = universe_h;
+                    }
+
+                    if (loaded_width > 0 && loaded_height > 0) {
+                        this->recreate_drawing_surface(loaded_width, loaded_height);
+                        SDL_SetWindowSize(this->window, loaded_width + 2 * App::default_margin, loaded_height + 2 * App::default_margin + App::app_bar_height);
+                        SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+                    }
+
+                    this->background_drawing_color = background_color;
                     this->change_screen_state(AppState::RENDERING_SCREEN);
                 } else {
                     this->notification_manager->push({
@@ -517,10 +395,10 @@ void App::handle_events() {
                     this->temporary_in_list = false;
                 }
             }
-
         }
 
         if (event.type == SDL_MOUSEMOTION && mouse_down){
+            //printf("event.type == SDL_MOUSEMOTION && mouse_down\n");
             int mx = event.motion.x;
             int my = event.motion.y;
 
@@ -602,8 +480,10 @@ void App::handle_events() {
                     this->temporary_in_list = true;
                 }
             }
+        }
 
-        } else if (event.type == SDL_MOUSEBUTTONUP){
+        if (event.type == SDL_MOUSEBUTTONUP){
+            //printf("event.type == SDL_MOUSEBUTTONUP\n");
             if (event.button.button == SDL_BUTTON_RIGHT && mouse_down == false) {
                 this->mouse_state = MouseState::NORMAL_MODE;
                 this->notification_manager->push({
@@ -626,21 +506,6 @@ void App::handle_events() {
             height_textbox->handleEvent(&event);
         }
     }
-}
-
-
-// METHOD IMPLEMENTATION
-void App::clear_screen(Uint32 color) {
-    if (!window_surface) return;
-    SDL_FillRect(window_surface, nullptr, color);
-}
-
-
-// METHOD IMPLEMENTATION
-void App::clear_screen(Uint8 r, Uint8 g, Uint8 b) {
-    if (!window_surface) return;
-    Uint32 color = SDL_MapRGB(window_surface->format, r, g, b);
-    SDL_FillRect(window_surface, NULL, color);
 }
 
 
@@ -726,10 +591,10 @@ void App::change_screen_state(AppState new_state) {
 // METHOD IMPLEMENTATION
 void App::load_menu_screen() {
     this->new_drawing_button = new ButtonComponent(
-        static_cast<int>(window_width * this->new_drawing_button_relative_x_percent - this->secondary_button_width / 2),
-        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2),
-        this->secondary_button_width,
-        this->default_button_height,
+        static_cast<int>(window_width * this->new_drawing_button_relative_x_percent - this->primary_button_width / 2),
+        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->primary_button_height / 2),
+        this->primary_button_width,
+        this->primary_button_height,
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Start a new drawing",
         FontManager::roboto_semibold_20,
@@ -737,14 +602,31 @@ void App::load_menu_screen() {
     );
 
     this->load_project_button = new ButtonComponent(
-        static_cast<int>(window_width * this->load_file_button_relative_x_percent - this->secondary_button_width / 2),
-        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->default_button_height / 2) + this->default_button_height + 15,
-        this->secondary_button_width,
-        this->default_button_height,
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - this->primary_button_width / 2),
+        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->primary_button_height / 2) + this->primary_button_height + 15,
+        this->primary_button_width,
+        this->primary_button_height,
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Open project file",
         FontManager::roboto_semibold_20,
         Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    text_title_surface = TTF_RenderText_Blended(FontManager::libertinus_regular_36, "BRUSHY", Colors::uint32_to_sdlcolor(this->window_surface, Colors::rgb_to_uint32(this->window_surface, 0, 0, 0)));
+
+    if (!text_title_surface) {
+        ErrorHandler::fatal_error("There was a problem rendering text: %s.\n", TTF_GetError());
+    }
+
+    text_rect.w = text_title_surface->w;
+    text_rect.h = text_title_surface->h;
+    text_rect.x = (window_width - text_rect.w) / 2;
+    text_rect.y = this->new_drawing_button->y - text_rect.h - 30;
+
+    this->app_icon_image = new ImageComponent(
+        "assets/Icon_256.bmp",
+        (window_width - App::main_image_size) / 2,
+        this->text_rect.y - App::main_image_size - App::bottom_image_margin
     );
 }
 
@@ -768,6 +650,55 @@ void App::load_new_project_screen() {
     this->app_bar_project_screen = new AppBar(this->window_width, App::app_bar_height, "Creating a new project", FontManager::roboto_semibold_20);
     this->app_bar_project_screen->set_background_color({255, 255, 255, 255});
     this->app_bar_project_screen->setTextColor({0, 0, 0, 255});
+
+    int btn_w = 300; // REMOVER
+    int icon_x = (window_width - 256) / 2;
+    int icon_y = 10;
+    int icon_w = 256;
+    int icon_h = 256;
+    int textbox_w = 300;
+    int textbox_h = 40;
+    int textbox_x = 50;
+    int textbox_y = 100;
+
+    this->create_project_button = new ButtonComponent(
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - btn_w / 2),
+        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->primary_button_height / 2),
+        btn_w,
+        this->primary_button_height,
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "secondary_background_button"),
+        "Create project",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->back_menu_button = new ButtonComponent(
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - btn_w / 2),
+        static_cast<int>(window_height * this->new_drawing_button_relative_y_percent - this->primary_button_height / 2) + this->primary_button_height + 15,
+        btn_w,
+        this->primary_button_height,
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Back to menu",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->width_textbox = new TextboxComponent(
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - textbox_w / 2),
+        textbox_y,
+        textbox_w,
+        textbox_h,
+        FontManager::roboto_semibold_20,
+        true
+    );
+
+    this->height_textbox = new TextboxComponent(
+        static_cast<int>(window_width * this->load_file_button_relative_x_percent - textbox_w / 2),
+        textbox_y + textbox_h + 60,
+        textbox_w, textbox_h,
+        FontManager::roboto_semibold_20,
+        true
+    );
 }
 
 
@@ -776,6 +707,26 @@ void App::unload_new_project_screen() {
     if (this->app_bar_project_screen != nullptr) {
         delete this->app_bar_project_screen;
         this->app_bar_project_screen = nullptr;
+    }
+
+    if (this->back_menu_button != nullptr) {
+        delete this->back_menu_button;
+        this->back_menu_button = nullptr;
+    }
+
+    if (this->app_bar_project_screen != nullptr) {
+        delete this->app_bar_project_screen;
+        this->app_bar_project_screen = nullptr;
+    }
+
+    if (this->width_textbox != nullptr) {
+        delete this->width_textbox;
+        this->width_textbox = nullptr;
+    }
+
+    if (this->height_textbox != nullptr) {
+        delete this->height_textbox;
+        this->height_textbox = nullptr;
     }
 }
 
@@ -789,8 +740,8 @@ void App::load_rendering_screen() {
     this->pencil_button = new ButtonComponent(
         static_cast<int>(window_width * 0.01),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Pencil",
         FontManager::roboto_semibold_20,
@@ -800,8 +751,8 @@ void App::load_rendering_screen() {
     this->eraser_button = new ButtonComponent(
         static_cast<int>(window_width * 0.1),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Eraser",
         FontManager::roboto_semibold_20,
@@ -811,8 +762,8 @@ void App::load_rendering_screen() {
     this->bucket_button = new ButtonComponent(
         static_cast<int>(window_width * 0.19),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Bucket",
         FontManager::roboto_semibold_20,
@@ -822,8 +773,8 @@ void App::load_rendering_screen() {
     this->line_button = new ButtonComponent(
         static_cast<int>(window_width * 0.28),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Line",
         FontManager::roboto_semibold_20,
@@ -833,8 +784,8 @@ void App::load_rendering_screen() {
     this->house_button = new ButtonComponent(
         static_cast<int>(window_width * 0.37),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "House",
         FontManager::roboto_semibold_20,
@@ -844,8 +795,8 @@ void App::load_rendering_screen() {
     this->tree_button = new ButtonComponent(
         static_cast<int>(window_width * 0.46),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Tree",
         FontManager::roboto_semibold_20,
@@ -855,8 +806,8 @@ void App::load_rendering_screen() {
     this->fence_button = new ButtonComponent(
         static_cast<int>(window_width * 0.55),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Fence",
         FontManager::roboto_semibold_20,
@@ -866,8 +817,8 @@ void App::load_rendering_screen() {
     this->sun_button = new ButtonComponent(
         static_cast<int>(window_width * 0.64),
         static_cast<int>(window_height * 0.01),
-        static_cast<int>(this->secondary_button_width/4),
-        static_cast<int>(this->default_button_height / 1.5),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
         Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
         "Sun",
         FontManager::roboto_semibold_20,
@@ -932,13 +883,56 @@ void App::unload_rendering_screen() {
 
 // METHOD IMPLEMENTATION
 void App::render_menu_screen() {
+    // Renders the background surface.
+    SDL_FillRect(this->window_surface, nullptr, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "main_background_window"));
 
+    // Renders the program name.
+    SDL_BlitSurface(text_title_surface, NULL, window_surface, &text_rect);
+
+    this->new_drawing_button->draw(window_surface);
+    this->load_project_button->draw(window_surface);
+    this->app_icon_image->draw(window_surface);
 }
 
 
 // METHOD IMPLEMENTATION
 void App::render_new_project_screen() {
+    // Enables text input only if any textbox is active.
+    if ((this->width_textbox && this->width_textbox->get_active()) || (this->height_textbox && this->height_textbox->get_active())) {
+        SDL_StartTextInput();
+    } else {
+        SDL_StopTextInput();
+    }
 
+    // Renders the background surface.
+    SDL_FillRect(this->window_surface, nullptr, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_window"));
+
+    if (width_textbox) {
+        width_textbox->render(window_surface);
+    }
+
+    if (height_textbox) {
+        height_textbox->render(window_surface);
+    }
+
+    // Draws textbox captions.
+    if (text_enter_width_surface && text_enter_height_surface) {
+        text_rect.w = text_enter_width_surface->w;
+        text_rect.h = text_enter_width_surface->h;
+        text_rect.x = (window_width - text_rect.w) / 2;
+        text_rect.y = width_textbox->rect.y - 30;
+        SDL_BlitSurface(text_enter_width_surface, NULL, window_surface, &text_rect);
+
+        text_rect.w = text_enter_height_surface->w;
+        text_rect.h = text_enter_height_surface->h;
+        text_rect.x = (window_width - text_rect.w) / 2;
+        text_rect.y = height_textbox->rect.y - 30;
+        SDL_BlitSurface(text_enter_height_surface, NULL, window_surface, &text_rect);
+    }
+
+    this->create_project_button->draw(window_surface);
+    this->back_menu_button->draw(window_surface);
+    this->app_bar_project_screen->draw(this->window_surface);
 }
 
 
@@ -948,16 +942,14 @@ void App::render_rendering_screen() {
     SDL_FillRect(this->window_surface, nullptr, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_window"));
 
     // Renders the drawing surface.
-    SDL_FillRect(this->drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
+    SDL_FillRect(this->drawing_surface, nullptr, this->background_drawing_color);
 
     for (Point p : this->points) {
-        //printf("(%f, %f)\n", p.get_x(), p.get_y());
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
         Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
     }
 
     for (Point p : this->fill_points) {
-        //printf("(%f, %f)\n", p.get_x(), p.get_y());
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
         Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), p_color);
     }
@@ -975,7 +967,6 @@ void App::render_rendering_screen() {
     }
 
     for (Point p : this->eraser_points) {
-        //printf("(%f, %f)\n", p.get_x(), p.get_y());
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 255, 255, 255); //TODO: TROCAR PARA COR DE FUNDO
         Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
     }

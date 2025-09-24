@@ -8,6 +8,7 @@ class App;
 class ButtonComponent;
 class TextboxComponent;
 class NotificationManager;
+class Colors;
 class House;
 class Tree;
 class Shape;
@@ -48,8 +49,6 @@ class Sun;
 #include "ImageComponent.h"
 #include "AppBarComponent.h"
 #include "Shape.h"
-#include "Circle.h"
-#include "Polygon.h"
 #include "House.h"
 #include "Tree.h"
 #include "Fence.h"
@@ -87,16 +86,18 @@ class App {
         int window_height;
         std::string window_title;
         MouseState mouse_state = MouseState::NORMAL_MODE;
-        NotificationManager *notification_manager;
+        NotificationManager *notification_manager = nullptr;
 
         // General graphical interface attributes and methods.
         static float new_drawing_button_relative_x_percent;
         static float new_drawing_button_relative_y_percent;
         static float load_file_button_relative_x_percent;
-        static int default_button_height;
-        static int secondary_button_width;
+        static int primary_button_height;
+        static int primary_button_width;
         static int app_bar_height;
         static int default_margin;
+        static int main_image_size;
+        static int bottom_image_margin;
 
         // Screen state attributes and methods.
         AppState app_state;
@@ -114,28 +115,12 @@ class App {
         void render_rendering_screen();
         bool recreate_drawing_surface(int new_width, int new_height);
 
-        // Graphical interface components attributes: MENU_SCREEN.
-        ImageComponent* app_icon_image;
-        ButtonComponent* new_drawing_button;
-        ButtonComponent* load_project_button;
-        SDL_Surface* text_title_surface;
-        SDL_Surface* text_enter_height_surface;
-        SDL_Surface* text_enter_width_surface;
-        SDL_Rect text_rect;
-
-        // Graphical interface components attributes: NEW_PROJECT_SCREEN.
-        ButtonComponent* create_project_button;
-        ButtonComponent* back_menu_button;
-        TextboxComponent* width_textbox;
-        TextboxComponent* height_textbox;
-        AppBar* app_bar_project_screen;
-
         // Drawing component list attributes.
         std::list<Point> points;
         std::list<Point> eraser_points;
         std::list<Point> fill_points;
         std::list<std::array<Point,2>> lines;
-        std::vector<std::unique_ptr<Shape> > shapes;
+        std::vector<std::unique_ptr<Shape>> shapes;
 
         // Drag and drop functionality attributes.
         bool mouse_down = false;
@@ -143,16 +128,33 @@ class App {
         Point temporary_dragging_point = Point(0,0);
         Point initial_point = Point(0,0);
 
+        // Graphical interface components attributes: MENU_SCREEN.
+        ImageComponent* app_icon_image = nullptr;
+        ButtonComponent* new_drawing_button = nullptr;
+        ButtonComponent* load_project_button = nullptr;
+        SDL_Surface* text_title_surface = nullptr;
+        SDL_Surface* text_enter_height_surface = nullptr;
+        SDL_Surface* text_enter_width_surface = nullptr;
+        SDL_Rect text_rect;
+
+        // Graphical interface components attributes: NEW_PROJECT_SCREEN.
+        ButtonComponent* create_project_button = nullptr;
+        ButtonComponent* back_menu_button = nullptr;
+        TextboxComponent* width_textbox = nullptr;
+        TextboxComponent* height_textbox = nullptr;
+        AppBar* app_bar_project_screen = nullptr;
+
         // Graphical interface components attributes: RENDERING_SCREEN.
-        ButtonComponent* eraser_button;
-        ButtonComponent* pencil_button;
-        ButtonComponent* bucket_button;
-        ButtonComponent* line_button;
-        ButtonComponent* house_button;
-        ButtonComponent* tree_button;
-        ButtonComponent* fence_button;
-        ButtonComponent* sun_button;
-        AppBar* app_bar_rendering_screen;
+        ButtonComponent* eraser_button = nullptr;
+        ButtonComponent* pencil_button = nullptr;
+        ButtonComponent* bucket_button = nullptr;
+        ButtonComponent* line_button = nullptr;
+        ButtonComponent* house_button = nullptr;
+        ButtonComponent* tree_button = nullptr;
+        ButtonComponent* fence_button = nullptr;
+        ButtonComponent* sun_button = nullptr;
+        AppBar* app_bar_rendering_screen = nullptr;
+        Uint32 background_drawing_color;
 
     public:
         App(const std::string& title, float width_percent, float height_percent);
@@ -161,8 +163,6 @@ class App {
         void run();
         void close(int exit_code = 1);
         void handle_events();
-        void clear_screen(Uint32 color);
-        void clear_screen(Uint8 r, Uint8 g, Uint8 b);
         void update_screen();
         int get_window_width();
         int get_window_height();
