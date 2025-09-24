@@ -15,7 +15,6 @@ int App::universe_width = 40;
 int App::universe_height = 30;
 
 
-
 // CONSTRUCTOR IMPLEMENTATION
 App::App(const std::string& title, float width_percent, float height_percent) {
     this->window = nullptr;
@@ -27,6 +26,7 @@ App::App(const std::string& title, float width_percent, float height_percent) {
     this->window_title = title;
     this->app_state = AppState::MENU_SCREEN;
     this->notification_manager = nullptr;
+
 
     // Initialization of external libraries.
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -87,6 +87,9 @@ App::App(const std::string& title, float width_percent, float height_percent) {
     }
 
     this->background_drawing_color = Colors::rgb_to_uint32(this->drawing_surface, 255, 255, 255);
+    this->primary_color = Colors::rgb_to_uint32(this->drawing_surface, 247, 30, 113);
+    this->second_color = Colors::rgb_to_uint32(this->drawing_surface, 30, 113, 247);
+    this->tertiary_color = Colors::rgb_to_uint32(this->drawing_surface, 113, 247, 30);
 }
 
 
@@ -456,25 +459,25 @@ void App::handle_events() {
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
-                         c, c, c)));
+                         this->primary_color, this->second_color, this->tertiary_color)));
                     } else if (this->mouse_state == MouseState::TREE_MODE){
                         shapes.emplace_back(std::unique_ptr<Shape>(new Tree (int(std::lround(ur.w)),
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
-                         c, c, c)));
+                         this->primary_color, this->second_color, this->tertiary_color)));
                     } else if (this->mouse_state == MouseState::FENCE_MODE){
                         shapes.emplace_back(std::unique_ptr<Shape>(new Fence (int(std::lround(ur.w)),
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
-                         c, c)));
+                         this->primary_color, this->second_color)));
                     } else if (this->mouse_state == MouseState::SUN_MODE){
                         shapes.emplace_back(std::unique_ptr<Shape>(new Sun (int(std::lround(ur.w)),
                          int(std::lround(ur.h)),
                          int(std::lround(ur.x)),
                          int(std::lround(ur.y)),
-                         c, c)));
+                         this->primary_color, this->second_color)));
                     }
                     // limpa estado do drag
                     this->temporary_in_list = true;
@@ -946,12 +949,12 @@ void App::render_rendering_screen() {
 
     for (Point p : this->points) {
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
-        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
+        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), this->primary_color);
     }
 
     for (Point p : this->fill_points) {
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
-        Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), p_color);
+        Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), this->primary_color);
     }
 
     Uint32 black = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
@@ -959,7 +962,7 @@ void App::render_rendering_screen() {
     for (auto& seg : lines) {
         Point& p0 = seg[0];
         Point& p1 = seg[1];
-        Primitives::draw_line(drawing_surface, p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), black, true);
+        Primitives::draw_line(drawing_surface, p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), this->primary_color, true);
     }
 
     for (size_t i = 0; i < shapes.size(); ++i) {
@@ -968,7 +971,7 @@ void App::render_rendering_screen() {
 
     for (Point p : this->eraser_points) {
         Uint32 p_color = SDL_MapRGB(drawing_surface->format, 255, 255, 255); //TODO: TROCAR PARA COR DE FUNDO
-        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
+        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), this->background_drawing_color);
     }
 
     SDL_Rect drawing_surface_rectangle;

@@ -73,6 +73,12 @@ enum class MouseState {
     SUN_MODE
 };
 
+enum class ColorState {
+    PRIMARY,
+    SECONDARY,
+    TERTIARY
+};
+
 class App {
     private:
         // Application attributes.
@@ -156,7 +162,10 @@ class App {
         AppBar* app_bar_rendering_screen = nullptr;
         Uint32 background_drawing_color;
 
+        // Colors
+
     public:
+        Uint32 primary_color, second_color, tertiary_color;
         App(const std::string& title, float width_percent, float height_percent);
         static int universe_width;
         static int universe_height;
@@ -169,6 +178,7 @@ class App {
         int get_screen_width();
         int get_screen_height();
         SDL_Surface* get_surface();
+        ColorState changing_color = PRIMARY;
 };
 
 #endif

@@ -48,6 +48,7 @@ void Tree::generate_points() {
 // rotate_figure() permanece a mesma
 void Tree::rotate_figure(double angle)
 {
+    angle *= -1;
     double x, y, radians, cosTheta, sinTheta, dx, dy;
     dx = (double)this->trunk_bottom_left.get_x();
     dy = (double)this->trunk_bottom_left.get_y();

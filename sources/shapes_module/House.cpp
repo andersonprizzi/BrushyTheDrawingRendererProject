@@ -48,6 +48,7 @@ void House::generate_points() {
 
 void House::rotate_figure(double angle)
 {
+    angle *= -1;
     double x, y, radians, cosTheta, sinTheta, dx, dy;
 
     dx = (double)this->wall_bottom_left.get_x();

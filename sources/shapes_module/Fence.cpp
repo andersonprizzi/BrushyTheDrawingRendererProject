@@ -68,6 +68,7 @@ void Fence::generate_points() {
 
 void Fence::rotate_figure(double angle)
 {
+    angle *= -1;
     double x, y, radians, cosTheta, sinTheta, dx, dy;
 
     dx = (double)this->vert_plank1_bottom_left.get_x();

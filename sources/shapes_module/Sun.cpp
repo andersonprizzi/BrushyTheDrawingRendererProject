@@ -24,6 +24,7 @@ void Sun::generate_points() {
 
 void Sun::rotate_figure(double angle)
 {
+    angle *= -1;
     double x, y, radians, cosTheta, sinTheta, dx, dy;
 
     dx = (double)this->sun_center.get_x();

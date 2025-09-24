@@ -87,8 +87,8 @@ Point Utils::universe_to_canvas(Point u,int canvas_w, int canvas_h,int universe_
     int x = int(std::floor(u.get_x() * double(canvas_w) / double(universe_w)));
     int y_from_bottom = int(std::floor(u.get_y() * double(canvas_h) / double(universe_h)));
     int y = (canvas_h - 1) - y_from_bottom;
-    x = clampi(x, 0, canvas_w - 1);
-    y = clampi(y, 0, canvas_h - 1);
+    //x = clampi(x, 0, canvas_w - 1);
+    //y = clampi(y, 0, canvas_h - 1);
     Point p = Point(x,y);
     return p;
 }
