@@ -8,8 +8,9 @@ float App::load_file_button_relative_x_percent = 0.50f;         // Posição hor
 int App::default_button_height = 45;
 int App::secondary_button_width = 300;
 int App::app_bar_height = 50;
-int App::universe_width = 100;
-int App::universe_height = 75;
+int App::universe_width = 40;
+int App::universe_height = 30;
+int App::default_margin = 30;
 
 
 // CONSTRUCTOR IMPLEMENTATION
@@ -67,9 +68,6 @@ App::App(const std::string& title, float width_percent, float height_percent) {
 
     this->window_surface = SDL_GetWindowSurface(window);
     this->drawing_surface = SDL_CreateRGBSurface(0, window_width, window_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000);
-
-    // Fills the drawing canvas with white.
-    SDL_FillRect(drawing_surface, nullptr, SDL_MapRGB(drawing_surface->format, 255, 255, 255));
 
     // Initializing notification manager.
     this->notification_manager = new NotificationManager(this->window_width, this->window_height);
@@ -228,6 +226,10 @@ void App::run() {
         } else if (this->app_state == AppState::RENDERING_SCREEN) {
             this->render_rendering_screen();
 
+            //casinha.translate(-10.0, 10.0);
+            //Point centro = Point(casinha.x_origin + 0.5 * casinha.width,casinha.y_origin + 0.5 * casinha.height);
+            //casinha.rotate_figure(drawing_surface, 45.0, centro);
+            //casinha.rotate_figure(45.0);
 
 
             /*
@@ -256,30 +258,6 @@ void App::run() {
             //casinha.rotate_figure(45.0);
             //casinha.scale(1.7, 0.5);
             //casinha.draw(drawing_surface);
-
-            */
-
-
-            /*
-            //Primitives::draw_line(this->surface, 0, 0, 500, 500, blue, true);
-            //Primitives::draw_line(this->surface, 200, 100, 450, 550, blue, false);
-            //Primitives::draw_curve(this->surface, 20, 10, 250, 200, 190, 350, 240, 420, red, true);
-            //Primitives::draw_circle(this->surface, 150, 150, 100, black, true, false);
-            //Primitives::flood_fill(this->surface, 150, 150, red);
-            //Primitives::draw_circle(this->surface, 450, 450, 100, green, false, false);
-            //Primitives::draw_circle(this->surface, 100, 400, 50, green, false, true);
-            //Primitives::draw_circle(this->surface, 480, 110, 50, red, true, true);
-            //Primitives::draw_ellipse(this->surface, 680, 89, 100, 50, red, false, false);
-            //Primitives::draw_ellipse(this->surface, 750, 450, 150, 50, black, false, true);
-            //Primitives::draw_ellipse(this->surface, 750, 300, 150, 50, black, true, true);
-            //Primitives::draw_ellipse(this->surface, 1050, 300, 100, 150, blue, true, false);
-
-            Polygon *polygon_2 = new Polygon(false, true, green, green, Point(110, 120));
-            polygon_2->add_point(Point(100, 100));
-            polygon_2->add_point(Point(200, 100));
-            polygon_2->add_point(Point(200, 200));
-            polygon_2->add_point(Point(100, 200));
-            polygon_2->draw(this->surface);
             */
         }
 
@@ -354,31 +332,49 @@ void App::handle_events() {
             }
 
             if (this->app_bar_project_screen) {
-                this->app_bar_project_screen->set_size(this->window_width, 50);
+                this->app_bar_project_screen->set_size(this->window_width, App::app_bar_height);
             }
 
             if (this->app_bar_rendering_screen) {
-                this->app_bar_rendering_screen->set_size(this->window_width, 50);
+                this->app_bar_rendering_screen->set_size(this->window_width, App::app_bar_height);
             }
         }
 
         // Processes mouse click events.
-        int mx = event.button.x;
-        int my = event.button.y;
-
-        // For veryfying click in the drawing surface
-        SDL_Rect dst_rect;
-        dst_rect.w = drawing_surface->w;
-        dst_rect.h = drawing_surface->h;
-        dst_rect.x = (window_width  - dst_rect.w) / 2;
-        dst_rect.y = (window_height - dst_rect.h) / 2;
-
         if (event.type == SDL_MOUSEBUTTONDOWN) {
+            int mx = event.button.x;
+            int my = event.button.y;
+
+            // For veryfying click in the drawing surface
+            SDL_Rect dst_rect;
+
+            if (drawing_surface) {
+                dst_rect.w = drawing_surface->w;
+                dst_rect.h = drawing_surface->h;
+                dst_rect.x = (window_width - dst_rect.w - 2) / 2;
+                dst_rect.y = (window_height - dst_rect.h + App::app_bar_height) / 2;
+            }
+
             if (event.button.button == SDL_BUTTON_LEFT && inside_rect(mx, my, dst_rect)) mouse_down = true;
 
             // Screen change: MENU_SCREEN > NEW_PROJECT_SCREEN
             if (this->app_state == AppState::MENU_SCREEN && new_drawing_button->is_clicked(mx, my)) {
                 this->change_screen_state(AppState::NEW_PROJECT_SCREEN);
+
+            // Se o usuário clicar em "Open project file"
+            } else if (this->app_state == AppState::MENU_SCREEN && load_project_button->is_clicked(mx, my)) {
+                if (FileManager::load_scene("ExemploTeste.csv", this->window_surface, this->shapes)) {
+                    this->recreate_drawing_surface(1024, 530);
+                    SDL_SetWindowSize(this->window, 1024 + 2 * App::default_margin, 530 + 2 * App::default_margin + App::app_bar_height);
+                    SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+                    this->change_screen_state(AppState::RENDERING_SCREEN);
+                } else {
+                    this->notification_manager->push({
+                        "Error!",
+                        "Could not load project file.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                }
 
             // Screen change: NEW_PROJECT_SCREEN > RENDERING_SCREEN
             } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && create_project_button->is_clicked(mx, my)) {
@@ -409,7 +405,8 @@ void App::handle_events() {
                     continue;
                 }
 
-                SDL_SetWindowSize(this->window, std::stoi(width_textbox->get_text()), std::stoi(height_textbox->get_text()));
+                this->recreate_drawing_surface(std::stoi(width_textbox->get_text()), std::stoi(height_textbox->get_text()));
+                SDL_SetWindowSize(this->window, std::stoi(width_textbox->get_text()) + 2 * App::default_margin, std::stoi(height_textbox->get_text()) + 2 * App::default_margin + App::app_bar_height);
                 SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
                 this->change_screen_state(AppState::RENDERING_SCREEN);
 
@@ -431,6 +428,7 @@ void App::handle_events() {
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
+
             } else if (this->app_state == AppState::RENDERING_SCREEN && this->bucket_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::BUCKET_MODE;
                 this->notification_manager->push({
@@ -438,6 +436,7 @@ void App::handle_events() {
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
+
             } else if (this->app_state == AppState::RENDERING_SCREEN && this->line_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::LINE_MODE;
                 this->notification_manager->push({
@@ -445,6 +444,7 @@ void App::handle_events() {
                         "Right-click to return to normal.",
                         { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
                     });
+
             } else if (this->app_state == AppState::RENDERING_SCREEN && this->house_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::HOUSE_MODE;
                 this->notification_manager->push({
@@ -454,6 +454,7 @@ void App::handle_events() {
                     });
                 this->mouse_down = false;
                 this->temporary_in_list = false;
+
             }else if (this->app_state == AppState::RENDERING_SCREEN && this->tree_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::TREE_MODE;
                 this->notification_manager->push({
@@ -463,6 +464,7 @@ void App::handle_events() {
                     });
                 this->mouse_down = false;
                 this->temporary_in_list = false;
+
             }else if (this->app_state == AppState::RENDERING_SCREEN && this->fence_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::FENCE_MODE;
                 this->notification_manager->push({
@@ -472,6 +474,7 @@ void App::handle_events() {
                     });
                 this->mouse_down = false;
                 this->temporary_in_list = false;
+
             }else if (this->app_state == AppState::RENDERING_SCREEN && this->sun_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::SUN_MODE;
                 this->notification_manager->push({
@@ -481,6 +484,7 @@ void App::handle_events() {
                     });
                 this->mouse_down = false;
                 this->temporary_in_list = false;
+
             } else if (this->app_state == AppState::RENDERING_SCREEN && inside_rect(mx, my, dst_rect) && event.button.button != SDL_BUTTON_RIGHT){
                 //DRAWING THINGS
                 if (this->mouse_state == MouseState::PENCIL_MODE){
@@ -514,10 +518,21 @@ void App::handle_events() {
                 }
             }
 
+        }
 
-        } else if (event.type == SDL_MOUSEMOTION && mouse_down){
-            mx = event.motion.x;
-            my = event.motion.y;
+        if (event.type == SDL_MOUSEMOTION && mouse_down){
+            int mx = event.motion.x;
+            int my = event.motion.y;
+
+            // For veryfying click in the drawing surface
+            SDL_Rect dst_rect;
+
+            if (drawing_surface) {
+                dst_rect.w = drawing_surface->w;
+                dst_rect.h = drawing_surface->h;
+                dst_rect.x = (window_width - dst_rect.w - 2) / 2;
+                dst_rect.y = (window_height - dst_rect.h + App::app_bar_height) / 2;
+            }
 
             if (this->app_state == AppState::RENDERING_SCREEN && inside_rect(mx, my, dst_rect)){
                 //DRAWING THINGS
@@ -537,6 +552,8 @@ void App::handle_events() {
                     if (!this->lines.empty()) lines.pop_back();
                     this->temporary_in_list = true;
                     this->lines.emplace_back(std::array<Point,2>{{ initial_point, Point(cx,cy) }});
+
+
                 } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE || this->mouse_state == MouseState::FENCE_MODE || this->mouse_state == MouseState::SUN_MODE){
                     // mouse -> canvas
                     int cx1 = mx - dst_rect.x;
@@ -585,6 +602,7 @@ void App::handle_events() {
                     this->temporary_in_list = true;
                 }
             }
+
         } else if (event.type == SDL_MOUSEBUTTONUP){
             if (event.button.button == SDL_BUTTON_RIGHT && mouse_down == false) {
                 this->mouse_state = MouseState::NORMAL_MODE;
@@ -764,7 +782,7 @@ void App::unload_new_project_screen() {
 
 // METHOD IMPLEMENTATION
 void App::load_rendering_screen() {
-    this->app_bar_rendering_screen = new AppBar(this->window_width, App::app_bar_height, "Brushy", FontManager::roboto_semibold_20);
+    this->app_bar_rendering_screen = new AppBar(this->window_width, App::app_bar_height, "", FontManager::roboto_semibold_20);
     this->app_bar_rendering_screen->set_background_color({255, 255, 255, 255});
     this->app_bar_rendering_screen->setTextColor({0, 0, 0, 255});
 
@@ -962,12 +980,12 @@ void App::render_rendering_screen() {
         Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p_color);
     }
 
-    SDL_Rect dst_rect;
-    dst_rect.w = drawing_surface->w;
-    dst_rect.h = drawing_surface->h;
-    dst_rect.x = (window_width - dst_rect.w) / 2;
-    dst_rect.y = (window_height - dst_rect.h) / 2;
-    SDL_BlitSurface(drawing_surface, nullptr, window_surface, &dst_rect);
+    SDL_Rect drawing_surface_rectangle;
+    drawing_surface_rectangle.w = drawing_surface->w;
+    drawing_surface_rectangle.h = drawing_surface->h;
+    drawing_surface_rectangle.x = (window_width - drawing_surface_rectangle.w - 2) / 2;
+    drawing_surface_rectangle.y = (window_height - drawing_surface_rectangle.h + App::app_bar_height) / 2;
+    SDL_BlitSurface(drawing_surface, nullptr, window_surface, &drawing_surface_rectangle);
 
     // Draws the components of the graphical interface.
     this->app_bar_rendering_screen->draw(this->window_surface);
@@ -979,4 +997,31 @@ void App::render_rendering_screen() {
     this->tree_button->draw(this->window_surface);
     this->fence_button->draw(this->window_surface);
     this->sun_button->draw(this->window_surface);
+}
+
+
+// METHOD IMPLEMENTATION
+bool App::recreate_drawing_surface(int new_width, int new_height) {
+    if (this->drawing_surface != nullptr) {
+        SDL_FreeSurface(this->drawing_surface);
+        this->drawing_surface = nullptr;
+    }
+
+    this->drawing_surface = SDL_CreateRGBSurface(
+        0,
+        new_width,
+        new_height,
+        32,
+        0x00FF0000,
+        0x0000FF00,
+        0x000000FF,
+        0x00000000
+    );
+
+    if (!this->drawing_surface) {
+        ErrorHandler::fatal_error("Unable to recreate drawing surface: %s", SDL_GetError());
+        return false;
+    }
+
+    return true;
 }

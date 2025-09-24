@@ -54,6 +54,7 @@ class Sun;
 #include "Tree.h"
 #include "Fence.h"
 #include "Sun.h"
+#include "FileManager.h"
 
 enum class AppState {
     MENU_SCREEN,
@@ -88,13 +89,14 @@ class App {
         MouseState mouse_state = MouseState::NORMAL_MODE;
         NotificationManager *notification_manager;
 
-        // General graphical interface methods and attributes.
+        // General graphical interface attributes and methods.
         static float new_drawing_button_relative_x_percent;
         static float new_drawing_button_relative_y_percent;
         static float load_file_button_relative_x_percent;
         static int default_button_height;
         static int secondary_button_width;
         static int app_bar_height;
+        static int default_margin;
 
         // Screen state attributes and methods.
         AppState app_state;
@@ -110,6 +112,7 @@ class App {
         void render_menu_screen();
         void render_new_project_screen();
         void render_rendering_screen();
+        bool recreate_drawing_surface(int new_width, int new_height);
 
         // Graphical interface components attributes: MENU_SCREEN.
         ImageComponent* app_icon_image;
@@ -127,7 +130,7 @@ class App {
         TextboxComponent* height_textbox;
         AppBar* app_bar_project_screen;
 
-        //PARADAS PARA GUI DO PAINT 2
+        // Drawing component list attributes.
         std::list<Point> points;
         std::list<Point> eraser_points;
         std::list<Point> fill_points;
@@ -135,7 +138,7 @@ class App {
         std::vector<std::unique_ptr<Shape> > shapes;
 
         // Drag and drop functionality attributes.
-        bool mouse_down = false; //Informa se o mouse foi baixado dentro da área de desenho (se desenho foi iniciado, basicamente)
+        bool mouse_down = false;
         bool temporary_in_list = false;
         Point temporary_dragging_point = Point(0,0);
         Point initial_point = Point(0,0);

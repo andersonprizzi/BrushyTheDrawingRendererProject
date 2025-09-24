@@ -157,12 +157,16 @@ void Tree::draw(SDL_Surface* surface) {
     Primitives::draw_line(surface, trunk_bottom_left.get_x(),  trunk_bottom_left.get_y(),  trunk_bottom_right.get_x(), trunk_bottom_right.get_y(), this->trunk_color, false);
     Primitives::draw_line(surface, trunk_top_left.get_x(),     trunk_top_left.get_y(),     trunk_top_right.get_x(),    trunk_top_right.get_y(),   this->trunk_color, false);
 
+    //printf("PASSOU 4.1\n");
+
     Primitives::draw_curve(surface,
         (int)trunk_bottom_left.get_x(),  (int)trunk_bottom_left.get_y(),
         (int)trunk_right_bezier_point.get_x(), (int)trunk_right_bezier_point.get_y(),
         (int)trunk_right_bezier_point.get_x(), (int)trunk_right_bezier_point.get_y(),
         (int)trunk_top_left.get_x(),     (int)trunk_top_left.get_y(),
         this->trunk_color, false);
+
+    //printf("PASSOU 4.2\n");
 
     Primitives::draw_curve(surface,
         (int)trunk_bottom_right.get_x(), (int)trunk_bottom_right.get_y(),
@@ -171,10 +175,14 @@ void Tree::draw(SDL_Surface* surface) {
         (int)trunk_top_right.get_x(),    (int)trunk_top_right.get_y(),
         this->trunk_color, false);
 
+    //printf("PASSOU 4.3\n");
+
     // preenchimento do tronco
     Point  trunk_fill     = Utils::universe_to_canvas(Point(this->trunk_fill.get_x(), this->trunk_fill.get_y()), device_width, device_height, universe_width, universe_height);
     Primitives::flood_fill(surface, (int)trunk_fill.get_x(), (int)trunk_fill.get_y(), this->trunk_color);
     //Primitives::set_pixel(surface, (int)trunk_fill.get_x(), (int)trunk_fill.get_y(), this->trunk_color);
+
+    //printf("PASSOU 4.4\n");
 
     // --- FOLHAS: 3 elipses preenchidas ---
     // raios em unidades do “universo”
@@ -199,8 +207,13 @@ void Tree::draw(SDL_Surface* surface) {
                              (tmp2.get_y() - leaves_first_elipsis_center.get_y()) * (tmp2.get_y() - leaves_first_elipsis_center.get_y())));
     ang = atan2(tmp.get_y() - leaves_first_elipsis_center.get_y(),
                 tmp.get_x() - leaves_first_elipsis_center.get_x());
+
+    //printf("PASSOU 4.5\n");
+
     Primitives::draw_rotated_ellipse(surface, (int)leaves_first_elipsis_center.get_x(), (int)leaves_first_elipsis_center.get_y(),
                                      rx_px, ry_px, ang, this->leaves_color, true);
+
+    //printf("PASSOU 4.6\n");
 
     // elipse 2 (esquerda)
     tmp  = Utils::universe_to_canvas(Point(this->leaves_second_elipsis_center.get_x() + rx2_u * cA,
@@ -217,6 +230,7 @@ void Tree::draw(SDL_Surface* surface) {
                 tmp.get_x() - leaves_second_elipsis_center.get_x());
     Primitives::draw_rotated_ellipse(surface, (int)leaves_second_elipsis_center.get_x(), (int)leaves_second_elipsis_center.get_y(),
                                      rx_px, ry_px, ang, this->leaves_color, true);
+    //printf("PASSOU 4.7\n");
 
     // elipse 3 (direita)
     tmp  = Utils::universe_to_canvas(Point(this->leaves_third_elipsis_center.get_x() + rx2_u * cA,
@@ -234,18 +248,17 @@ void Tree::draw(SDL_Surface* surface) {
     Primitives::draw_rotated_ellipse(surface, (int)leaves_third_elipsis_center.get_x(), (int)leaves_third_elipsis_center.get_y(),
                                      rx_px, ry_px, ang, this->leaves_color, true);
 
+    //printf("PASSOU 4.8\n");
+
     // --- MAÇÃ: círculo preenchido ---
-    double ru = 0.06 * (this->width < this->height ? this->width : this->height);
-    tmp = Utils::universe_to_canvas(Point(this->apple_center.get_x() + ru, this->apple_center.get_y()),
-                                    device_width, device_height, universe_width, universe_height);
+    /*double ru = 0.06 * (this->width < this->height ? this->width : this->height);
+    tmp = Utils::universe_to_canvas(Point(this->apple_center.get_x() + ru, this->apple_center.get_y()), device_width, device_height, universe_width, universe_height);
     int r_px = abs((int)tmp.get_x() - (int)apple_center.get_x());
-    Primitives::draw_circle(surface, (int)apple_center.get_x(), (int)apple_center.get_y(),
-                            r_px, this->apple_color, true, true);
+    Primitives::draw_circle(surface, (int)apple_center.get_x(), (int)apple_center.get_y(), r_px, this->apple_color, true, true);
+    printf("PASSOU 4.9\n");*/
 
-    tmp = Utils::universe_to_canvas(Point(this->apple2_center.get_x() + ru, this->apple2_center.get_y()),
-                                    device_width, device_height, universe_width, universe_height);
+    /*tmp = Utils::universe_to_canvas(Point(this->apple2_center.get_x() + ru, this->apple2_center.get_y()), device_width, device_height, universe_width, universe_height);
     r_px = abs((int)tmp.get_x() - (int)apple2_center.get_x());
-    Primitives::draw_circle(surface, (int)apple2_center.get_x(), (int)apple2_center.get_y(),
-                            r_px, this->apple_color, true, true);
+    Primitives::draw_circle(surface, (int)apple2_center.get_x(), (int)apple2_center.get_y(), r_px, this->apple_color, true, true);
+    printf("PASSOU 4.10\n");*/
 }
-

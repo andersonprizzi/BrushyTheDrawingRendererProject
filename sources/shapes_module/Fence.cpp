@@ -149,6 +149,9 @@ void Fence::scale(double scale_x, double scale_y){
     this->height = (int)lround(this->height * scale_y);
 }
 
+
+
+
 void Fence::draw(SDL_Surface* surface) {
     if (!surface) return;
 

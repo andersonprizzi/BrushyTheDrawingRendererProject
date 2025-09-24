@@ -1,4 +1,3 @@
-// INCLUDES
 #include "Utils.h"
 
 
@@ -20,10 +19,10 @@
  * @return int Returns 1 if the point is within bounds, 0 otherwise.
  */
 int Utils::verify_limits(SDL_Surface* surface, int x, int y) {
-    if (surface->w < x || surface->h < y || x < 0 || y < 0){
+    /*if (surface->w < x || surface->h < y || x < 0 || y < 0){
         ErrorHandler::log_error("Point out of bounds.");
         return 0;
-    }
+    }*/
 
     return 1;
 }

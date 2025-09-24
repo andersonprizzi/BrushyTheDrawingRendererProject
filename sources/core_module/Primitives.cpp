@@ -1,12 +1,15 @@
+#include <stack>
+#include <utility>
 #include "Primitives.h"
+
 
 // METHOD IMPLEMENTATION
 /**
  * @brief
- *      Sets the color of a specific pixel on an SDL_Surface.
- *      This function writes a pixel with the given Uint32 color to the specified
- *      coordinates (x, y) on the provided surface. It performs bounds checking
- *      using Utils::verify_limits to prevent invalid memory access.
+ * Sets the color of a specific pixel on an SDL_Surface.
+ * This function writes a pixel with the given Uint32 color to the specified
+ * coordinates (x, y) on the provided surface. It performs bounds checking
+ * using Utils::verify_limits to prevent invalid memory access.
  *
  * @param surface
  *      Pointer to the SDL_Surface where the pixel will be set.
@@ -18,36 +21,19 @@
  *      Uint32 value representing the color to set (in the surface's pixel format).
  **/
 void Primitives::set_pixel(SDL_Surface* surface, int x, int y, Uint32 color) {
-    if (!surface) {
-            printf("MORRA SURFACE\n");
-            return;
-    }
-    if (Utils::verify_limits(surface, x, y) == 0){
-        printf("OUT OF BOUNDS\n");
+    if (!surface) return;
+
+    if (x >= surface->w || y >= surface->h || x < 0 || y < 0) {
+        // ErrorHandler::log_error("Point out of bounds.");
         return;
     }
+
 
     Uint32* pixels = (Uint32*)surface->pixels;
     int pitch = surface->pitch / 4;
     pixels[y * pitch + x] = color;
 }
 
-void Primitives::set_pixel_log(SDL_Surface* surface, int x, int y, Uint32 color) {
-    if (!surface) {
-            printf("MORRA SURFACE\n");
-            return;
-    }
-    if (Utils::verify_limits(surface, x, y) == 0){
-        printf("OUT OF BOUNDS\n");
-        return;
-    }
-
-    Uint32* pixels = (Uint32*)surface->pixels;
-    int pitch = surface->pitch / 4;
-    //Uint32 mapped_color = SDL_MapRGB(surface->format, 0, 0, 0);  // preto
-    pixels[y * pitch + x] = color;
-    printf("PITNADO");
-}
 
 // METHOD IMPLEMENTATION
 /**
@@ -352,6 +338,8 @@ void Primitives::draw_xiaolin_wu_line(SDL_Surface* surface, int x1, int y1, int 
  *       based on the maximum delta between the first and last control points
  *       to ensure smooth rendering even for steep curves.
  */
+
+/*
 void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
     if (Utils::verify_limits(surface, x0, y0) == 0) return;
     if (Utils::verify_limits(surface, x1, y1) == 0) return;
@@ -383,12 +371,94 @@ void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1,
             Primitives::set_pixel(surface, x_int, y_int, color);
         }
     }
+}*/
+
+
+
+void Primitives::draw_bezier_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
+    // [REMOVIDO] A verificação inicial apenas nos pontos de controle foi removida.
+    // Ela é insuficiente, pois a curva pode sair dos limites mesmo que os
+    // controles estejam dentro da tela. A verificação será feita ponto a ponto dentro do loop.
+
+    if (!surface) {
+        return;
+    }
+
+    // Pré-calcula a largura e altura para evitar acessos repetidos a surface->w/h
+    const int surface_w = surface->w;
+    const int surface_h = surface->h;
+
+    // Aumenta o número de passos para garantir uma curva mais suave e conectada
+    const int steps = std::max(abs(x3 - x0), abs(y3 - y0)) * 2;
+    if (steps == 0) { // Se for um ponto único
+        if (x0 >= 0 && x0 < surface_w && y0 >= 0 && y0 < surface_h) {
+            Primitives::set_pixel(surface, x0, y0, color);
+        }
+        return;
+    }
+
+    SDL_Color sdl_color;
+    if (anti_aliasing) {
+        sdl_color = Colors::uint32_to_sdlcolor(surface, color);
+    }
+
+    for (int i = 0; i <= steps; i++) {
+        double u = static_cast<double>(i) / steps;
+
+        // [OTIMIZAÇÃO] Evita múltiplos cálculos de pow()
+        double u1 = 1.0 - u;
+        double u1_pow3 = u1 * u1 * u1;
+        double u_pow3 = u * u * u;
+        double u1_pow2_u_3 = 3.0 * u * u1 * u1;
+        double u_pow2_u1_3 = 3.0 * u * u * u1;
+
+        double xu = u1_pow3 * x0 + u1_pow2_u_3 * x1 + u_pow2_u1_3 * x2 + u_pow3 * x3;
+        double yu = u1_pow3 * y0 + u1_pow2_u_3 * y1 + u_pow2_u1_3 * y2 + u_pow3 * y3;
+
+        int x_int = static_cast<int>(round(xu));
+        int y_int = static_cast<int>(round(yu));
+
+        if (anti_aliasing) {
+            float fx = static_cast<float>(xu - floor(xu));
+            float fy = static_cast<float>(yu - floor(yu));
+
+            // [SEGURANÇA] Verifica cada um dos 4 pixels antes de tentar desenhar
+            int p1x = static_cast<int>(floor(xu)), p1y = static_cast<int>(floor(yu));
+            int p2x = p1x + 1, p2y = p1y;
+            int p3x = p1x, p3y = p1y + 1;
+            int p4x = p1x + 1, p4y = p1y + 1;
+
+            if (p1x >= 0 && p1x < surface_w && p1y >= 0 && p1y < surface_h)
+                Primitives::blend_pixel(surface, p1x, p1y, sdl_color, (1.0f - fx) * (1.0f - fy));
+
+            if (p2x >= 0 && p2x < surface_w && p2y >= 0 && p2y < surface_h)
+                Primitives::blend_pixel(surface, p2x, p2y, sdl_color, fx * (1.0f - fy));
+
+            if (p3x >= 0 && p3x < surface_w && p3y >= 0 && p3y < surface_h)
+                Primitives::blend_pixel(surface, p3x, p3y, sdl_color, (1.0f - fx) * fy);
+
+            if (p4x >= 0 && p4x < surface_w && p4y >= 0 && p4y < surface_h)
+                Primitives::blend_pixel(surface, p4x, p4y, sdl_color, fx * fy);
+
+        } else {
+            // [SEGURANÇA] Só desenha o pixel se ele estiver dentro dos limites da tela
+            if (x_int >= 0 && x_int < surface_w && y_int >= 0 && y_int < surface_h) {
+                Primitives::set_pixel(surface, x_int, y_int, color);
+            }
+        }
+    }
 }
+
+
 
 void Primitives::draw_flat_curve(SDL_Surface* surface,
                             int x0, int y0, int x1, int y1,
                             int x2, int y2, int x3, int y3,
                             Uint32 color, bool anti_aliasing) {
+    printf("ENTROU NESTA BOMBA\n");
+    return;
+
+
     if (!surface) return;
     // Se preferir manter o guard original, ok; mas remover os 4 checks evita "sumir" a curva
     // caso algum controle fique fora, já que vamos desenhar com clipping do draw_line.
@@ -462,7 +532,15 @@ void Primitives::draw_flat_curve(SDL_Surface* surface,
     recurse(P0, P1, P2, P3, 0);
 }
 
+
+
+
+
 void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, Uint32 color, bool anti_aliasing) {
+    Primitives::draw_bezier_curve(surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
+    return;
+
+    /*
     // "Flatness" da cúbica: maior distância dos pontos de controle internos
     // à reta que liga as extremidades (em pixels).
     double d1 = Utils::perp_dist((double)x1, (double)y1, (double)x0, (double)y0, (double)x3, (double)y3);
@@ -489,7 +567,9 @@ void Primitives::draw_curve(SDL_Surface* surface, int x0, int y0, int x1, int y1
         // curva acentuada → robusta (subdivisão/adaptativa em linhas conectadas)
         Primitives::draw_flat_curve  (surface, x0, y0, x1, y1, x2, y2, x3, y3, color, anti_aliasing);
     }
+    */
 }
+
 
 // METHOD IMPLEMENTATION
 /**
@@ -571,6 +651,7 @@ void Primitives::draw_circle(SDL_Surface* surface, int cx, int cy, int radius, U
         }
     }
 }
+
 
 void Primitives::fill_polygon(SDL_Surface* s, const std::vector<SDL_Point>& pts, Uint32 color) {
     if (!s || pts.size() < 3) return;
@@ -828,103 +909,45 @@ void Primitives::draw_text(SDL_Surface* target, TTF_Font* font, const std::strin
 // Pinta shape com base na cor, usando o pixel de referência (x,y) como cor dos pixels que será substituída pela fillColor
 // Se a pilha enche, o algoritmo apenas deixa de pintar pixels que precisariam ser processados, não dá erro.
 void Primitives::flood_fill(SDL_Surface* surface, int x, int y, Uint32 fill_color) {
-    if (!surface) return;
+    if (!surface || x < 0 || x >= surface->w || y < 0 || y >= surface->h) {
+        return;
+    }
 
-    Uint32 targetColor = get_pixel(surface, x, y);
-    if (targetColor == fill_color) return;
+    Uint32 target_color = get_pixel(surface, x, y);
+    if (target_color == fill_color) {
+        return;
+    }
 
-    // Buffer para a pilha (simples, tamanho fixo)
-    const int MAX_STACK = 100000;
-    int stack_x[MAX_STACK];
-    int stack_y[MAX_STACK];
-    int stack_top = 0;
+    // A pilha agora usa pares (x, y) e cresce dinamicamente.
+    std::stack<std::pair<int, int>> pixels;
+    pixels.push({x, y});
 
-    // Push inicial
-    stack_x[stack_top] = x;
-    stack_y[stack_top] = y;
-    stack_top++;
+    while (!pixels.empty()) {
+        // Pega o pixel do topo da pilha e o remove (pop).
+        std::pair<int, int> current = pixels.top();
+        pixels.pop();
 
-    while (stack_top > 0) {
-        // Pop
-        stack_top--;
-        int px = stack_x[stack_top];
-        int py = stack_y[stack_top];
+        int px = current.first;
+        int py = current.second;
 
-        // Limites da surface
-        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h) continue;
-        if (get_pixel(surface, px, py) != targetColor) continue;
+        // Verifica os limites e a cor do pixel atual.
+        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h || get_pixel(surface, px, py) != target_color) {
+            continue;
+        }
 
-        // Pinta pixel
+        // Pinta o pixel.
         set_pixel(surface, px, py, fill_color);
 
-        // Push vizinhos
-        if (stack_top + 4 < MAX_STACK) {
-            stack_x[stack_top] = px + 1;
-            stack_y[stack_top] = py;
-            stack_top++;
-            stack_x[stack_top] = px - 1;
-            stack_y[stack_top] = py;
-            stack_top++;
-            stack_x[stack_top] = px;
-            stack_y[stack_top] = py + 1;
-            stack_top++;
-            stack_x[stack_top] = px;
-            stack_y[stack_top] = py - 1;
-            stack_top++;
-        }
+        // Adiciona (push) os vizinhos à pilha.
+        pixels.push({px + 1, py});
+        pixels.push({px - 1, py});
+        pixels.push({px, py + 1});
+        pixels.push({px, py - 1});
     }
 }
 
-void Primitives::flood_fill_log(SDL_Surface* surface, int x, int y, Uint32 fill_color) {
-    if (!surface) return;
 
-    Uint32 targetColor = get_pixel(surface, x, y);
-    if (targetColor == fill_color) return;
-
-    // Buffer para a pilha (simples, tamanho fixo)
-    const int MAX_STACK = 100000;
-    int stack_x[MAX_STACK];
-    int stack_y[MAX_STACK];
-    int stack_top = 0;
-
-    // Push inicial
-    stack_x[stack_top] = x;
-    stack_y[stack_top] = y;
-    stack_top++;
-
-    while (stack_top > 0) {
-        // Pop
-        stack_top--;
-        int px = stack_x[stack_top];
-        int py = stack_y[stack_top];
-
-        // Limites da surface
-        if (px < 0 || px >= surface->w || py < 0 || py >= surface->h) continue;
-        if (get_pixel(surface, px, py) != targetColor) continue;
-
-        // Pinta pixel
-        set_pixel(surface, px, py, fill_color);
-
-        // Push vizinhos
-        if (stack_top + 4 < MAX_STACK) {
-            stack_x[stack_top] = px + 1;
-            stack_y[stack_top] = py;
-            stack_top++;
-            stack_x[stack_top] = px - 1;
-            stack_y[stack_top] = py;
-            stack_top++;
-            stack_x[stack_top] = px;
-            stack_y[stack_top] = py + 1;
-            stack_top++;
-            stack_x[stack_top] = px;
-            stack_y[stack_top] = py - 1;
-            stack_top++;
-        }
-
-        printf("FEEL THE FLOOD");
-    }
-}
-
+// METHOD IMPLEMENTATION
 void Primitives::draw_rotated_ellipse(SDL_Surface* surface,int cx, int cy, int rx, int ry,float angle_rad, Uint32 color, bool filled)
 {
     if (!surface) return;
