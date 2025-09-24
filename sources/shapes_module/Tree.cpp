@@ -171,12 +171,19 @@ void Tree::draw(SDL_Surface* surface) {
     Primitives::draw_rotated_ellipse(surface, c_leaves3.get_x(), c_leaves3.get_y(), rx_px, ry_px, ang, this->leaves_color, true);
 
     /*
-    int r_apple_px = lround(0.06 * this->width * scale_x);
-    Point c_apple1 = Utils::universe_to_canvas(this->apple_center, device_width, device_height, universe_width, universe_height);
-    Point c_apple2 = Utils::universe_to_canvas(this->apple2_center, device_width, device_height, universe_width, universe_height);
+*/
+    //Maca
+    // --- MAÇÃS ---
+    const double scale_x = static_cast<double>(device_width)  / static_cast<double>(universe_width);
+    const double scale_y = static_cast<double>(device_height) / static_cast<double>(universe_height);
 
-    Primitives::draw_circle(surface, c_apple1.get_x(), c_apple1.get_y(), r_apple_px, this->apple_color, true, true);
-    Primitives::draw_circle(surface, c_apple2.get_x(), c_apple2.get_y(), r_apple_px, this->apple_color, true, true);
-    */
+    const double r_apple_u = 0.06 * std::min(this->width, this->height); // raio no universo
+    int r_px = static_cast<int>(std::lround(r_apple_u * std::min(scale_x, scale_y))); // escolha min/avg
+
+    if (r_px <= 0) r_px = 1; // segurança
+
+    Primitives::draw_circle(surface, c_apple1.get_x(), c_apple1.get_y(), r_px, this->apple_color, true, true);
+    Primitives::draw_circle(surface, c_apple2.get_x(), c_apple2.get_y(), r_px, this->apple_color, true, true);
+
 }
 

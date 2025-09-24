@@ -29,6 +29,7 @@ class Sun;
 // C standard library.
 #include <cstdio>
 #include <cstdarg>
+#include <string>
 #include <strings.h>
 
 // External libraries.
@@ -70,7 +71,8 @@ enum class MouseState {
     HOUSE_MODE,
     TREE_MODE,
     FENCE_MODE,
-    SUN_MODE
+    SUN_MODE,
+    COLOR_MODE
 };
 
 enum class ColorState {
@@ -159,10 +161,17 @@ class App {
         ButtonComponent* tree_button = nullptr;
         ButtonComponent* fence_button = nullptr;
         ButtonComponent* sun_button = nullptr;
+        ButtonComponent* save_button = nullptr;
         AppBar* app_bar_rendering_screen = nullptr;
         Uint32 background_drawing_color;
 
         // Colors
+        ButtonComponent* primary_selector = nullptr;
+        ButtonComponent* secondary_selector = nullptr;
+        ButtonComponent* tertiary_selector = nullptr;
+        ButtonComponent* red_button = nullptr;
+        ButtonComponent* green_button = nullptr;
+        ButtonComponent* blue_button = nullptr;
 
     public:
         Uint32 primary_color, second_color, tertiary_color;
@@ -178,7 +187,7 @@ class App {
         int get_screen_width();
         int get_screen_height();
         SDL_Surface* get_surface();
-        ColorState changing_color = PRIMARY;
+        ColorState changing_color = ColorState::PRIMARY;
 };
 
 #endif

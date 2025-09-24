@@ -44,6 +44,9 @@ void House::generate_points() {
     this->wall_fill = Point(this->x_origin + 0.1 * this->width, this->y_origin + 0.4 * this->height);
     this->door_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.22 * this->height);
     this->roof_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.65  * this->height);
+    this->roof_fill2 = Point(this->x_origin + 0.25 * this->width, this->y_origin + 0.52  * this->height);
+    this->roof_fill3 = Point(this->x_origin + 0.75 * this->width, this->y_origin + 0.52  * this->height);
+    this->roof_fill4 = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.98  * this->height);
 }
 
 void House::rotate_figure(double angle)
@@ -123,6 +126,9 @@ void House::draw(SDL_Surface* surface) {
     Point wall_fill          = Utils::universe_to_canvas(this->wall_fill,          device_width, device_height, universe_width, universe_height);
     Point door_fill          = Utils::universe_to_canvas(this->door_fill,          device_width, device_height, universe_width, universe_height);
     Point roof_fill          = Utils::universe_to_canvas(this->roof_fill,          device_width, device_height, universe_width, universe_height);
+    Point roof_fill2          = Utils::universe_to_canvas(this->roof_fill2,          device_width, device_height, universe_width, universe_height);
+    Point roof_fill3          = Utils::universe_to_canvas(this->roof_fill3,          device_width, device_height, universe_width, universe_height);
+    Point roof_fill4          = Utils::universe_to_canvas(this->roof_fill4,          device_width, device_height, universe_width, universe_height);
 
     Primitives::draw_line(surface, wall_bottom_left.get_x(),  wall_bottom_left.get_y(),  wall_top_left.get_x(),    wall_top_left.get_y(),    walls_color, false);
     Primitives::draw_line(surface, wall_top_left.get_x(), wall_top_left.get_y(), wall_top_right.get_x(),   wall_top_right.get_y(),   walls_color, false);
@@ -143,5 +149,8 @@ void House::draw(SDL_Surface* surface) {
     Primitives::flood_fill(surface, (int)wall_fill.get_x(), (int)wall_fill.get_y(), walls_color);
     Primitives::flood_fill(surface, (int)door_fill.get_x(), (int)door_fill.get_y(), door_color);
     Primitives::flood_fill(surface, (int)roof_fill.get_x(), (int)roof_fill.get_y(), roof_color);
+    Primitives::flood_fill(surface, (int)roof_fill2.get_x(), (int)roof_fill2.get_y(), roof_color);
+    Primitives::flood_fill(surface, (int)roof_fill3.get_x(), (int)roof_fill3.get_y(), roof_color);
+    //Primitives::flood_fill(surface, (int)roof_fill4.get_x(), (int)roof_fill4.get_y(), roof_color);
 }
 

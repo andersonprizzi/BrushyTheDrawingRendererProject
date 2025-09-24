@@ -8,6 +8,12 @@ Point::Point(double new_x = 0, double new_y = 0) {
     y = new_y;
 }
 
+Point::Point(double new_x = 0, double new_y = 0, Uint32 color = 0) {
+    this->x = new_x;
+    this->y = new_y;
+    this->color = color;
+}
+
 
 // METHOD IMPLEMENTATION
 double Point::get_x() const {

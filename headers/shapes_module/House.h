@@ -32,6 +32,9 @@ private:
     Point wall_fill = Point(0, 0);
     Point door_fill = Point(0, 0);
     Point roof_fill = Point(0, 0);
+    Point roof_fill2 = Point(0, 0);
+    Point roof_fill3 = Point(0, 0);
+    Point roof_fill4 = Point(0, 0);
 
     std::array<Point*, 12> pts;
 

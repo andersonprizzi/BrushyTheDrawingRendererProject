@@ -154,14 +154,6 @@ void App::handle_events() {
     while (SDL_PollEvent(&event)) {
         // Processes the program exit event.
         if (event.type == SDL_QUIT) {
-            /*
-            SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-            if (SDL_SaveBMP(screenSurface, "screenshot.bmp") == 0) {
-                printf("Tela salva como screenshot.bmp\n");
-            } else {
-                printf("Erro ao salvar BMP: %s\n", SDL_GetError());
-            }
-            */
             running = false;
         }
 
@@ -205,7 +197,6 @@ void App::handle_events() {
 
         // Processes mouse click events.
         if (event.type == SDL_MOUSEBUTTONDOWN) {
-            //printf("event.type == SDL_MOUSEBUTTONDOWN\n");
             int mx = event.button.x;
             int my = event.button.y;
 
@@ -291,10 +282,22 @@ void App::handle_events() {
                 SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
                 this->change_screen_state(AppState::RENDERING_SCREEN);
 
+
             // Screen change: NEW_PROJECT_SCREEN > MENU_SCREEN
             } else if (this->app_state == AppState::NEW_PROJECT_SCREEN && back_menu_button->is_clicked(mx, my)) {
                 this->change_screen_state(AppState::MENU_SCREEN);
 
+
+            } else if (this->app_state == AppState::RENDERING_SCREEN && this->save_button->is_clicked(mx, my)) {
+                if (SDL_SaveBMP(this->drawing_surface, "screenshot.bmp") == 0) {
+                    this->notification_manager->push({
+                        "Screenshot saved!",
+                        "Screenshot saved at the root directory.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                } else {
+                    printf("Erro ao salvar BMP: %s\n", SDL_GetError());
+                }
             } else if (this->app_state == AppState::RENDERING_SCREEN && this->pencil_button->is_clicked(mx, my)) {
                 this->mouse_state = MouseState::PENCIL_MODE;
                 this->notification_manager->push({
@@ -366,13 +369,97 @@ void App::handle_events() {
                 this->mouse_down = false;
                 this->temporary_in_list = false;
 
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->primary_selector->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::COLOR_MODE;
+                this->notification_manager->push({
+                        "Primary color mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->changing_color = ColorState::PRIMARY;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->secondary_selector->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::COLOR_MODE;
+                this->notification_manager->push({
+                        "Secondary color mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->changing_color = ColorState::SECONDARY;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->tertiary_selector->is_clicked(mx, my)) {
+                this->mouse_state = MouseState::COLOR_MODE;
+                this->notification_manager->push({
+                        "Tertiary color mode",
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+                this->changing_color = ColorState::TERTIARY;
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->mouse_state == MouseState::COLOR_MODE && this->red_button->is_clicked(mx, my)) {
+                std::string temp = "";
+                if (this->changing_color == ColorState::PRIMARY){
+                    temp = "Primary color is set red";
+                    this->primary_color = red_button->color;
+                }
+                else if (this->changing_color == ColorState::SECONDARY){
+                    temp = "Seconday color is set red";
+                    this->second_color = red_button->color;
+                }
+                else if (this->changing_color == ColorState::TERTIARY){
+                    temp = "Tertiary color is set red";
+                    this->tertiary_color = red_button->color;
+                }
+
+                this->notification_manager->push({
+                        temp,
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->mouse_state == MouseState::COLOR_MODE && this->blue_button->is_clicked(mx, my)) {
+                std::string temp = "";
+                if (this->changing_color == ColorState::PRIMARY){
+                    temp = "Primary color is set blue";
+                    this->primary_color = blue_button->color;
+                }
+                else if (this->changing_color == ColorState::SECONDARY){
+                    temp = "Seconday color is set blue";
+                    this->second_color = blue_button->color;
+                }
+                else if (this->changing_color == ColorState::TERTIARY){
+                    temp = "Tertiary color is set blue";
+                    this->tertiary_color = blue_button->color;
+                }
+
+                this->notification_manager->push({
+                        temp,
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
+            }else if (this->app_state == AppState::RENDERING_SCREEN && this->mouse_state == MouseState::COLOR_MODE && this->green_button->is_clicked(mx, my)) {
+                std::string temp = "";
+                if (this->changing_color == ColorState::PRIMARY){
+                    temp = "Primary color is set green";
+                    this->primary_color = green_button->color;
+                }
+                else if (this->changing_color == ColorState::SECONDARY){
+                    temp = "Seconday color is set green";
+                    this->second_color = green_button->color;
+                }
+                else if (this->changing_color == ColorState::TERTIARY){
+                    temp = "Tertiary color is set green";
+                    this->tertiary_color = green_button->color;
+                }
+
+                this->notification_manager->push({
+                        temp,
+                        "Right-click to return to normal.",
+                        { this->window_width - 20 - 300, this->window_height - 20 - 80, 300, 80 },
+                    });
             } else if (this->app_state == AppState::RENDERING_SCREEN && inside_rect(mx, my, dst_rect) && event.button.button != SDL_BUTTON_RIGHT){
                 //DRAWING THINGS
                 if (this->mouse_state == MouseState::PENCIL_MODE){
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
-                    this->points.emplace_back(cx, cy);
+                    this->points.emplace_back(Point(cx, cy,this->primary_color));
                 } if (this->mouse_state == MouseState::ERASER_MODE){
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
@@ -382,7 +469,7 @@ void App::handle_events() {
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
 
-                    this->fill_points.emplace_back(cx, cy);
+                    this->fill_points.emplace_back(Point(cx, cy, this->primary_color));
                 }else if (this->mouse_state == MouseState::LINE_MODE) {
                     int cx = mx - dst_rect.x;     // coordenada X no canvas
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
@@ -401,7 +488,6 @@ void App::handle_events() {
         }
 
         if (event.type == SDL_MOUSEMOTION && mouse_down){
-            //printf("event.type == SDL_MOUSEMOTION && mouse_down\n");
             int mx = event.motion.x;
             int my = event.motion.y;
 
@@ -432,9 +518,7 @@ void App::handle_events() {
                     int cy = my - dst_rect.y;     // coordenada Y no canvas
                     if (!this->lines.empty()) lines.pop_back();
                     this->temporary_in_list = true;
-                    this->lines.emplace_back(std::array<Point,2>{{ initial_point, Point(cx,cy) }});
-
-
+                    this->lines.emplace_back(std::array<Point,2>{{ initial_point, Point(cx,cy,this->primary_color) }});
                 } else if (this->mouse_state == MouseState::HOUSE_MODE || this->mouse_state == MouseState::TREE_MODE || this->mouse_state == MouseState::FENCE_MODE || this->mouse_state == MouseState::SUN_MODE){
                     // mouse -> canvas
                     int cx1 = mx - dst_rect.x;
@@ -827,6 +911,83 @@ void App::load_rendering_screen() {
         FontManager::roboto_semibold_20,
         Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
     );
+
+    this->primary_selector = new ButtonComponent(
+        static_cast<int>(window_width * 0.73),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 1.5),
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "C1",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->secondary_selector = new ButtonComponent(
+        static_cast<int>(window_width * 0.78),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 1.5),
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "C2",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->tertiary_selector = new ButtonComponent(
+        static_cast<int>(window_width * 0.83),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 1.5),
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "C3",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->green_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.88),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 3),
+        Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "green"),
+        "",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->red_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.88),
+        static_cast<int>(window_height * 0.05),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 3),
+        Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "red"),
+        "",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->blue_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.93),
+        static_cast<int>(window_height * 0.05),
+        static_cast<int>(this->primary_button_width/8),
+        static_cast<int>(this->primary_button_height / 3),
+        Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "aqua"),
+        "",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
+
+    this->save_button = new ButtonComponent(
+        static_cast<int>(window_width * 0.98),
+        static_cast<int>(window_height * 0.01),
+        static_cast<int>(this->primary_button_width/4),
+        static_cast<int>(this->primary_button_height / 1.5),
+        Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "primary_background_button"),
+        "Save",
+        FontManager::roboto_semibold_20,
+        Colors::uint32_to_sdlcolor(this->window_surface, Colors::get_color(this->window_surface, Colors::interface_colors_table, Colors::number_of_interface_colors, "button_text_color"))
+    );
 }
 
 
@@ -875,6 +1036,11 @@ void App::unload_rendering_screen() {
     if (this->sun_button != nullptr) {
         delete this->sun_button;
         this->sun_button = nullptr;
+    }
+
+    if (this->save_button != nullptr) {
+        delete this->save_button;
+        this->save_button = nullptr;
     }
 }
 
@@ -947,26 +1113,23 @@ void App::render_rendering_screen() {
     // Renders the drawing surface.
     SDL_FillRect(this->drawing_surface, nullptr, this->background_drawing_color);
 
-    for (Point p : this->points) {
-        Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
-        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), this->primary_color);
-    }
-
-    for (Point p : this->fill_points) {
-        Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
-        Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), this->primary_color);
-    }
-
-    Uint32 black = Colors::get_color(this->window_surface, Colors::drawing_colors_table, Colors::number_of_drawing_colors, "black");
-
     for (auto& seg : lines) {
         Point& p0 = seg[0];
         Point& p1 = seg[1];
-        Primitives::draw_line(drawing_surface, p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), this->primary_color, true);
+        Primitives::draw_line(drawing_surface, p0.get_x(), p0.get_y(), p1.get_x(), p1.get_y(), p1.color, true);
     }
 
     for (size_t i = 0; i < shapes.size(); ++i) {
         shapes[i]->draw(drawing_surface);
+    }
+
+    for (Point p : this->points) {
+        Primitives::set_pixel(drawing_surface, p.get_x(), p.get_y(), p.color);
+    }
+
+    for (Point p : this->fill_points) {
+        Uint32 p_color = SDL_MapRGB(drawing_surface->format, 0, 240, 100); //TODO: TROCAR PARA COR PRIMÁRIA
+        Primitives::flood_fill(drawing_surface, p.get_x(), p.get_y(), p.color);
     }
 
     for (Point p : this->eraser_points) {
@@ -991,6 +1154,13 @@ void App::render_rendering_screen() {
     this->tree_button->draw(this->window_surface);
     this->fence_button->draw(this->window_surface);
     this->sun_button->draw(this->window_surface);
+    this->primary_selector->draw(this->window_surface);
+    this->secondary_selector->draw(this->window_surface);
+    this->tertiary_selector->draw(this->window_surface);
+    this->green_button->draw(this->window_surface);
+    this->red_button->draw(this->window_surface);
+    this->blue_button->draw(this->window_surface);
+    this->save_button->draw(this->window_surface);
 }
 
 

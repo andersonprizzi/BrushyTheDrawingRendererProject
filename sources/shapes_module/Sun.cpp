@@ -173,10 +173,10 @@ void Sun::draw(SDL_Surface* surface) {
         // arestas (a base será coberta pela elipse)
         Primitives::draw_line(surface, (int)b1.get_x(), (int)b1.get_y(),
                               (int)tip.get_x(), (int)tip.get_y(),
-                              this->sunrays_color, /*aa=*/true);
+                              this->sunrays_color, /*aa=*/false);
         Primitives::draw_line(surface, (int)b2.get_x(), (int)b2.get_y(),
                               (int)tip.get_x(), (int)tip.get_y(),
-                              this->sunrays_color, /*aa=*/true);
+                              this->sunrays_color, /*aa=*/false);
 
         // seed para flood fill (puxado ao ápice)
         const double sx = 0.40*tip.get_x() + 0.30*b1.get_x() + 0.30*b2.get_x();
