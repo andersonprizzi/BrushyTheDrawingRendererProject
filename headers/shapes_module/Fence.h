@@ -4,7 +4,7 @@
 #include "Utils.h"
 #include "Shape.h"   // <<---- ADICIONE ISTO
 #include "Point.h"
-#include <sdl.h>    // se preferir, pode manter por causa de uint32 (ou também forward)
+#include <sdl.h>    // se preferir, pode manter por causa de uint32 (ou tambï¿½m forward)
 //struct SDL_Surface; // forward-declare
 
 class Fence : public Shape {
@@ -35,7 +35,11 @@ private:
     Point top2 = Point(0,0);
 
     Point vertical1_fill = Point(0, 0);
+    Point vertical1_fill2 = Point(0, 0);
+    Point vertical1_fill3 = Point(0, 0);
     Point vertical2_fill = Point(0, 0);
+    Point vertical2_fill2 = Point(0, 0);
+    Point vertical2_fill3 = Point(0, 0);
     Point hor1_p1_fill = Point(0, 0);
     Point hor1_p2_fill = Point(0, 0);
     Point hor1_p3_fill = Point(0, 0);
@@ -47,7 +51,7 @@ private:
     void generate_points() override;
 
     //std::vector<Point*> pts[28];
-    std::array<Point*, 28> pts;
+    std::array<Point*, 32> pts;
 
 public:
     //int height = 0, width = 0, x_origin = 0, y_origin = 0;

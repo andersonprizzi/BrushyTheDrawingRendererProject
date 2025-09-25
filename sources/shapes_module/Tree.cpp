@@ -106,6 +106,23 @@ void Tree::scale(double sx, double sy){
 }
 
 
+// Função auxiliar: ponto de Bézier cúbica (De Casteljau)
+static std::pair<int,int> bezierPoint(double t,
+                                      int x0,int y0,int x1,int y1,
+                                      int x2,int y2,int x3,int y3)
+{
+    double u   = 1.0 - t;
+    double uu  = u * u;
+    double tt  = t * t;
+    double uuu = uu * u;
+    double ttt = tt * t;
+
+    double x = uuu * x0 + 3 * uu * t * x1 + 3 * u * tt * x2 + ttt * x3;
+    double y = uuu * y0 + 3 * uu * t * y1 + 3 * u * tt * y2 + ttt * y3;
+
+    return std::pair<int,int>((int)std::lround(x), (int)std::lround(y));
+}
+
 void Tree::draw(SDL_Surface* surface) {
     if (!surface) return;
 
@@ -129,11 +146,65 @@ void Tree::draw(SDL_Surface* surface) {
     Point c_apple2 = Utils::universe_to_canvas(this->apple2_center, device_width, device_height, universe_width, universe_height);
 
     // --- TRONCO ---
+    /*
     Primitives::draw_line(surface, c_trunk_bl.get_x(), c_trunk_bl.get_y(), c_trunk_br.get_x(), c_trunk_br.get_y(), this->trunk_color, false);
     Primitives::draw_line(surface, c_trunk_tl.get_x(), c_trunk_tl.get_y(), c_trunk_tr.get_x(), c_trunk_tr.get_y(), this->trunk_color, false);
     Primitives::draw_curve(surface, c_trunk_bl.get_x(), c_trunk_bl.get_y(), c_bezier_r.get_x(), c_bezier_r.get_y(), c_bezier_r.get_x(), c_bezier_r.get_y(), c_trunk_tl.get_x(), c_trunk_tl.get_y(), this->trunk_color, false);
     Primitives::draw_curve(surface, c_trunk_br.get_x(), c_trunk_br.get_y(), c_bezier_l.get_x(), c_bezier_l.get_y(), c_bezier_l.get_x(), c_bezier_l.get_y(), c_trunk_tr.get_x(), c_trunk_tr.get_y(), this->trunk_color, false);
     Primitives::flood_fill(surface, c_trunk_fill.get_x(), c_trunk_fill.get_y(), this->trunk_color);
+*/
+const int Lx0 = c_trunk_bl.get_x(), Ly0 = c_trunk_bl.get_y();
+const int Lx1 = c_bezier_r.get_x(), Ly1 = c_bezier_r.get_y();
+const int Lx2 = c_bezier_r.get_x(), Ly2 = c_bezier_r.get_y();
+const int Lx3 = c_trunk_tl.get_x(), Ly3 = c_trunk_tl.get_y();
+
+const int Rx0 = c_trunk_br.get_x(), Ry0 = c_trunk_br.get_y();
+const int Rx1 = c_bezier_l.get_x(), Ry1 = c_bezier_l.get_y();
+const int Rx2 = c_bezier_l.get_x(), Ry2 = c_bezier_l.get_y();
+const int Rx3 = c_trunk_tr.get_x(), Ry3 = c_trunk_tr.get_y();
+
+
+// Passos suficientes + mínimo
+int steps = std::max(std::abs(Lx3 - Lx0), std::abs(Ly3 - Ly0)) * 4;
+if (steps < 24) steps = 24;
+
+// Inicializa vértices compartilhados (evita re-arredondar o mesmo t)
+std::pair<int,int> L_prev = bezierPoint(0.0, Lx0,Ly0, Lx1,Ly1, Lx2,Ly2, Lx3,Ly3);
+std::pair<int,int> R_prev = bezierPoint(0.0, Rx0,Ry0, Rx1,Ry1, Rx2,Ry2, Rx3,Ry3);
+
+for (int i = 0; i < steps; ++i) {
+    double t1 = (double)(i + 1) / (double)steps;
+
+    std::pair<int,int> L_next = bezierPoint(t1, Lx0,Ly0, Lx1,Ly1, Lx2,Ly2, Lx3,Ly3);
+    std::pair<int,int> R_next = bezierPoint(t1, Rx0,Ry0, Rx1,Ry1, Rx2,Ry2, Rx3,Ry3);
+
+    const int L0x = L_prev.first, L0y = L_prev.second;
+    const int R0x = R_prev.first, R0y = R_prev.second;
+    const int L1x = L_next.first, L1y = L_next.second;
+    const int R1x = R_next.first, R1y = R_next.second;
+
+    // Triangulação principal (diagonal L0-R1)
+    Primitives::draw_triangle(surface, L0x, L0y, R0x, R0y, R1x, R1y, this->trunk_color);
+    Primitives::draw_triangle(surface, L0x, L0y, R1x, R1y, L1x, L1y, this->trunk_color);
+
+    // Triangulação redundante (diagonal R0-L1) — cobre possíveis fendas
+    Primitives::draw_triangle(surface, L0x, L0y, R0x, R0y, L1x, L1y, this->trunk_color);
+    Primitives::draw_triangle(surface, R0x, R0y, R1x, R1y, L1x, L1y, this->trunk_color);
+
+    // Avança reaproveitando os vértices já arredondados
+    L_prev = L_next;
+    R_prev = R_next;
+}
+
+// (Opcional) bordas para acabamento
+Primitives::draw_curve(surface, Lx0,Ly0, Lx1,Ly1, Lx2,Ly2, Lx3,Ly3, this->trunk_color, false);
+Primitives::draw_curve(surface, Rx0,Ry0, Rx1,Ry1, Rx2,Ry2, Rx3,Ry3, this->trunk_color, false);
+Primitives::draw_line(surface, c_trunk_bl.get_x(), c_trunk_bl.get_y(),
+                               c_trunk_br.get_x(), c_trunk_br.get_y(),
+                               this->trunk_color, false);
+Primitives::draw_line(surface, c_trunk_tl.get_x(), c_trunk_tl.get_y(),
+                               c_trunk_tr.get_x(), c_trunk_tr.get_y(),
+                               this->trunk_color, false);
 
     // --- FOLHAS ---
     double rx1_u = 0.38 * this->width, ry1_u = 0.22 * this->height;

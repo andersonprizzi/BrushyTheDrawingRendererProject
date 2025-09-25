@@ -25,6 +25,13 @@ class Primitives {
         static void draw_text(SDL_Surface* target, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color);
         static void fill_polygon(SDL_Surface* s, const std::vector<SDL_Point>& pts, Uint32 color);
         static void flood_fill(SDL_Surface* surface, int x, int y, Uint32 fillColor);
+        static void draw_triangle(SDL_Surface* surface,int x0, int y0,int x1, int y1,int x2, int y2,Uint32 color);
+        static void draw_rectangle(SDL_Surface* surface,
+                                  int x0, int y0,
+                                  int x1, int y1,
+                                  int x2, int y2,
+                                  int x3, int y3,
+                                  Uint32 color);
 };
 
 #endif

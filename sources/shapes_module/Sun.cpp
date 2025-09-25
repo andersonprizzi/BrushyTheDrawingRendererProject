@@ -186,7 +186,7 @@ void Sun::draw(SDL_Surface* surface) {
 
     // ---------- Elipse central com rx/ry em PX ----------
     Primitives::draw_ellipse(surface, (int)std::lround(C.get_x()), (int)std::lround(C.get_y()),
-                             rx_px, ry_px, this->sun_color, /*filled=*/true, /*aa=*/true);
+                             rx_px, ry_px, this->sun_color, false, true);
 
     // ---------- Flood fill em cada raio ----------
     for (const auto& p : seeds)

@@ -20,7 +20,9 @@ House::House(int width, int height, int universe_x_origin, int universe_y_origin
     this->pts = {
         &this->wall_top_left, &this->wall_top_right, &this->wall_bottom_right, &this->wall_bottom_left,
         &this->door_top_left, &this->door_top_right, &this->door_bottom_right, &this->door_bottom_left,
-        &this->roof_peak, &this->wall_fill, &this->door_fill, &this->roof_fill
+        &this->roof_peak, &this->wall_fill, &this->wall_fill2, &this->wall_fill3,
+        &this->door_fill,
+        &this->roof_fill, &this->roof_fill2, &this->roof_fill3, &this->roof_fill4
         // se tiver pontos de fill, pode adicioná-los aqui também
     };
 
@@ -42,11 +44,13 @@ void House::generate_points() {
     this->roof_peak         = Point(this->x_origin + 0.5 * this->width, this->y_origin + 1.0 * this->height);
 
     this->wall_fill = Point(this->x_origin + 0.1 * this->width, this->y_origin + 0.4 * this->height);
+    this->wall_fill2 = Point(this->x_origin + 0.9 * this->width, this->y_origin + 0.4 * this->height);
+    this->wall_fill3 = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.4 * this->height);
     this->door_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.22 * this->height);
     this->roof_fill = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.65  * this->height);
     this->roof_fill2 = Point(this->x_origin + 0.25 * this->width, this->y_origin + 0.52  * this->height);
     this->roof_fill3 = Point(this->x_origin + 0.75 * this->width, this->y_origin + 0.52  * this->height);
-    this->roof_fill4 = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.98  * this->height);
+    this->roof_fill4 = Point(this->x_origin + 0.5 * this->width, this->y_origin + 0.95  * this->height);
 }
 
 void House::rotate_figure(double angle)
@@ -124,33 +128,44 @@ void House::draw(SDL_Surface* surface) {
     Point roof_peak          = Utils::universe_to_canvas(this->roof_peak,          device_width, device_height, universe_width, universe_height);
 
     Point wall_fill          = Utils::universe_to_canvas(this->wall_fill,          device_width, device_height, universe_width, universe_height);
+    Point wall_fill2          = Utils::universe_to_canvas(this->wall_fill2,          device_width, device_height, universe_width, universe_height);
+    Point wall_fill3          = Utils::universe_to_canvas(this->wall_fill3,          device_width, device_height, universe_width, universe_height);
+
     Point door_fill          = Utils::universe_to_canvas(this->door_fill,          device_width, device_height, universe_width, universe_height);
     Point roof_fill          = Utils::universe_to_canvas(this->roof_fill,          device_width, device_height, universe_width, universe_height);
     Point roof_fill2          = Utils::universe_to_canvas(this->roof_fill2,          device_width, device_height, universe_width, universe_height);
     Point roof_fill3          = Utils::universe_to_canvas(this->roof_fill3,          device_width, device_height, universe_width, universe_height);
     Point roof_fill4          = Utils::universe_to_canvas(this->roof_fill4,          device_width, device_height, universe_width, universe_height);
 
+    /*
     Primitives::draw_line(surface, wall_bottom_left.get_x(),  wall_bottom_left.get_y(),  wall_top_left.get_x(),    wall_top_left.get_y(),    walls_color, false);
     Primitives::draw_line(surface, wall_top_left.get_x(), wall_top_left.get_y(), wall_top_right.get_x(),   wall_top_right.get_y(),   walls_color, false);
     Primitives::draw_line(surface, wall_top_right.get_x(), wall_top_right.get_y(), wall_bottom_right.get_x(),wall_bottom_right.get_y(),walls_color, false);
     Primitives::draw_line(surface, wall_bottom_right.get_x(), wall_bottom_right.get_y(), wall_bottom_left.get_x(), wall_bottom_left.get_y(), walls_color, false);
-
+*/
+    Primitives::draw_rectangle(surface, wall_bottom_left.get_x(), wall_bottom_left.get_y(),
+                                  wall_bottom_right.get_x(), wall_bottom_right.get_y(),
+                                  wall_top_left.get_x(), wall_top_left.get_y(),
+                                  wall_top_right.get_x(), wall_top_right.get_y(),
+                                  this->walls_color);
     // telhado (arestas até o pico)
+    /*
     Primitives::draw_line(surface, wall_top_left.get_x(),  wall_top_left.get_y(),  roof_peak.get_x(), roof_peak.get_y(), roof_color, true);
     Primitives::draw_line(surface, wall_top_right.get_x(), wall_top_right.get_y(), roof_peak.get_x(), roof_peak.get_y(), roof_color, true);
+    */
+    Primitives::draw_triangle(surface, wall_top_left.get_x(), wall_top_left.get_y(), wall_top_right.get_x(), wall_top_right.get_y(), roof_peak.get_x(), roof_peak.get_y(), roof_color);
 
     // desenho da porta (polígono)
+    /*
     Primitives::draw_line(surface, door_bottom_left.get_x(),  door_bottom_left.get_y(), door_top_left.get_x(),   door_top_left.get_y(), door_color, false);
     Primitives::draw_line(surface, door_top_left.get_x(),     door_top_left.get_y(), door_top_right.get_x(),  door_top_right.get_y(), door_color, false);
     Primitives::draw_line(surface, door_top_right.get_x(),    door_top_right.get_y(), door_bottom_right.get_x(),door_bottom_right.get_y(), door_color,false);
     Primitives::draw_line(surface, door_bottom_right.get_x(), door_bottom_right.get_y(), door_bottom_left.get_x(), door_bottom_left.get_y(), door_color, false);
-
-    // flood fills usando os pontos já convertidos
-    Primitives::flood_fill(surface, (int)wall_fill.get_x(), (int)wall_fill.get_y(), walls_color);
-    Primitives::flood_fill(surface, (int)door_fill.get_x(), (int)door_fill.get_y(), door_color);
-    Primitives::flood_fill(surface, (int)roof_fill.get_x(), (int)roof_fill.get_y(), roof_color);
-    Primitives::flood_fill(surface, (int)roof_fill2.get_x(), (int)roof_fill2.get_y(), roof_color);
-    Primitives::flood_fill(surface, (int)roof_fill3.get_x(), (int)roof_fill3.get_y(), roof_color);
-    //Primitives::flood_fill(surface, (int)roof_fill4.get_x(), (int)roof_fill4.get_y(), roof_color);
+    */
+    Primitives::draw_rectangle(surface, door_bottom_left.get_x(), door_bottom_left.get_y(),
+                                  door_top_left.get_x(), door_top_left.get_y(),
+                                  door_top_right.get_x(), door_top_right.get_y(),
+                                  door_bottom_right.get_x(), door_bottom_right.get_y(),
+                                  this->door_color);
 }
 

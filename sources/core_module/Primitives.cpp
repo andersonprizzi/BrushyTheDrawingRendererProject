@@ -860,7 +860,6 @@ void Primitives::flood_fill(SDL_Surface* surface, int x, int y, Uint32 fill_colo
     }
 }
 
-
 // METHOD IMPLEMENTATION
 void Primitives::draw_rotated_ellipse(SDL_Surface* surface, int cx, int cy, int rx, int ry, float angle_rad, Uint32 color, bool filled)
 {
@@ -913,3 +912,145 @@ void Primitives::draw_rotated_ellipse(SDL_Surface* surface, int cx, int cy, int 
     }
 }
 
+
+void Primitives::draw_triangle(SDL_Surface* surface,
+                                      int x0, int y0,
+                                      int x1, int y1,
+                                      int x2, int y2,
+                                      Uint32 color)
+{
+    if (!surface) return;
+
+
+auto edge_fn = [](int ax, int ay, int bx, int by, int px, int py) -> long long {
+        // (By - Ay)*(Px - Ax) - (Bx - Ax)*(Py - Ay)
+        return (long long)(by - ay) * (px - ax) - (long long)(bx - ax) * (py - ay);
+    };
+
+    long long area2 = edge_fn(x0,y0, x1,y1, x2,y2);
+    if (area2 == 0) {
+        // Triângulo degenerado: desenha as arestas
+        Primitives::draw_bresenham_line(surface, x0, y0, x1, y1, color);
+        Primitives::draw_bresenham_line(surface, x1, y1, x2, y2, color);
+        Primitives::draw_bresenham_line(surface, x2, y2, x0, y0, color);
+        return;
+    }
+
+    // BBox inteira (não clampada)
+    int minx = std::min(x0, std::min(x1, x2));
+    int maxx = std::max(x0, std::max(x1, x2));
+    int miny = std::min(y0, std::min(y1, y2));
+    int maxy = std::max(y0, std::max(y1, y2));
+
+    // Top-left rule
+    auto is_top_left = [](int ax, int ay, int bx, int by) -> bool {
+        int dx = bx - ax, dy = by - ay;
+        return (dy < 0) || (dy == 0 && dx < 0);
+    };
+
+    bool e0_top = is_top_left(x1,y1, x2,y2); // oposta a v0
+    bool e1_top = is_top_left(x2,y2, x0,y0); // oposta a v1
+    bool e2_top = is_top_left(x0,y0, x1,y1); // oposta a v2
+
+    // Coeficientes integrais da edge function: E(P)=A*x + B*y + C
+    struct EC { long long A,B,C; };
+    auto coeffs = [](int ax,int ay,int bx,int by) -> EC {
+        EC c;
+        c.A = (long long)(by - ay);
+        c.B = (long long)-(bx - ax);
+        // C = bx*ay - by*ax  (forma compatível com A,B acima)
+        c.C = (long long)bx * ay - (long long)by * ax;
+        return c;
+    };
+
+    EC e0 = coeffs(x1,y1, x2,y2);
+    EC e1 = coeffs(x2,y2, x0,y0);
+    EC e2 = coeffs(x0,y0, x1,y1);
+
+    // Bias para amostrar no centro do pixel: (A*0.5 + B*0.5)
+    auto center_bias = [](const EC& e) -> long long {
+        // como A e B são inteiros, A/2 + B/2 em aritmética inteira truncada funciona
+        // (usar 64 bits evita overflow)
+        return (e.A >> 1) + (e.B >> 1);
+    };
+    long long bias0 = center_bias(e0);
+    long long bias1 = center_bias(e1);
+    long long bias2 = center_bias(e2);
+
+    for (int y = miny; y <= maxy; ++y) {
+        // E(minx + 0.5, y + 0.5) = A*minx + B*y + C + (A/2 + B/2)
+        long long E0 = e0.A * (long long)minx + e0.B * (long long)y + e0.C + bias0;
+        long long E1 = e1.A * (long long)minx + e1.B * (long long)y + e1.C + bias1;
+        long long E2 = e2.A * (long long)minx + e2.B * (long long)y + e2.C + bias2;
+
+        for (int x = minx; x <= maxx; ++x) {
+            if (area2 > 0) {
+                bool c0 = (E0 > 0) || (E0 == 0 && e0_top);
+                bool c1 = (E1 > 0) || (E1 == 0 && e1_top);
+                bool c2 = (E2 > 0) || (E2 == 0 && e2_top);
+                if (c0 && c1 && c2)
+                    Primitives::set_pixel(surface, x, y, color);
+            } else {
+                bool c0 = (E0 < 0) || (E0 == 0 && e0_top);
+                bool c1 = (E1 < 0) || (E1 == 0 && e1_top);
+                bool c2 = (E2 < 0) || (E2 == 0 && e2_top);
+                if (c0 && c1 && c2)
+                    Primitives::set_pixel(surface, x, y, color);
+            }
+
+            // próximo pixel em X: E += A
+            E0 += e0.A; E1 += e1.A; E2 += e2.A;
+        }
+    }
+}
+
+void Primitives::draw_rectangle(SDL_Surface* surface,
+                                int x0, int y0,
+                                int x1, int y1,
+                                int x2, int y2,
+                                int x3, int y3,
+                                Uint32 color)
+{
+    if (!surface) return;
+
+    // Coloca em arrays para facilitar o manuseio por índice.
+    int xs[4] = { x0, x1, x2, x3 };
+    int ys[4] = { y0, y1, y2, y3 };
+
+    // Escolhe a diagonal: o par com maior distância ao quadrado.
+    auto d2 = [&](int i, int j) -> long long {
+        long long dx = (long long)xs[i] - (long long)xs[j];
+        long long dy = (long long)ys[i] - (long long)ys[j];
+        return dx*dx + dy*dy;
+    };
+
+    int di = 0, dj = 1;                  // índices da diagonal escolhida
+    long long best = d2(0,1);
+
+    const int pairs[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
+    for (int p = 0; p < 6; ++p) {
+        int i = pairs[p][0], j = pairs[p][1];
+        long long cur = d2(i,j);
+        if (cur > best) {
+            best = cur; di = i; dj = j;
+        }
+    }
+
+    // Os dois índices restantes (os outros vértices do retângulo).
+    int others[2], k = 0;
+    for (int i = 0; i < 4; ++i) if (i != di && i != dj) others[k++] = i;
+
+    // Triangula sempre pela diagonal (di)-(dj).
+    // Isso cobre o retângulo inteiro sem buracos, independentemente da ordem de entrada.
+    Primitives::draw_triangle(surface,
+                              xs[di], ys[di],
+                              xs[others[0]], ys[others[0]],
+                              xs[dj], ys[dj],
+                              color);
+
+    Primitives::draw_triangle(surface,
+                              xs[di], ys[di],
+                              xs[dj], ys[dj],
+                              xs[others[1]], ys[others[1]],
+                              color);
+}
